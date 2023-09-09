@@ -1,7 +1,4 @@
-import 'dart:html';
-
 import 'package:flutter/material.dart';
-import 'package:scf_maze/app/widget/Hover.dart';
 
 class Sidebar extends StatefulWidget {
   const Sidebar({super.key});
@@ -27,7 +24,8 @@ class _SidebarState extends State<Sidebar> {
               sidebarItem(Icons.bed_outlined, "Main"),
               sidebarItem(Icons.alarm, "Kuru"),
               sidebarItem(Icons.food_bank, "Crepe"),
-              Spacer(),
+              sidebarItem(Icons.add, "New"),
+              const Spacer(),
               sidebarItem(Icons.settings, "Settings")
             ],
           ),
