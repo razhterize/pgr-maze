@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'widget/Sidebar.dart';
+import 'package:pocketbase/pocketbase.dart';
+import 'package:scf_maze/app/widget/table.dart';
+import 'widget/sidebar.dart';
+
 class App extends StatefulWidget {
   const App({super.key});
 
@@ -8,6 +11,7 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
+  final PocketBase pb = PocketBase("http://127.0.0.1:1111");
   bool sidebarOpen = false;
 
   @override
@@ -17,15 +21,10 @@ class _AppState extends State<App> {
       home: Scaffold(
         body: Row(
           children: [
-            Sidebar(),
+            const Sidebar(),
             Padding(
-              padding: EdgeInsets.only(left: 10, right: 10),
-              child: const Expanded(
-                child: Row(
-                  children: [Text("Data")],
-                ),
-              ),
-            )
+                padding: const EdgeInsets.only(left: 10, right: 10),
+                child: MemberTable(guild: "kuru", pb: pb))
           ],
         ),
       ),
