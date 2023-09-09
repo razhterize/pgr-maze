@@ -11,24 +11,27 @@ class Sidebar extends StatefulWidget {
 }
 
 class _SidebarState extends State<Sidebar> {
-  bool _open = false;
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 350),
-      width: _open ? 100 : 50,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.lightBlueAccent),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Column(
-        children: [
-          sidebarItem(Icons.bed_outlined, "Main"),
-          sidebarItem(Icons.alarm, "Kuru"),
-          sidebarItem(Icons.food_bank, "Crepe"),
-          Spacer(),
-          sidebarItem(Icons.settings, "Settings")
-        ],
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.lightBlueAccent),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: SizedBox(
+          width: 50,
+          child: Column(
+            children: [
+              sidebarItem(Icons.bed_outlined, "Main"),
+              sidebarItem(Icons.alarm, "Kuru"),
+              sidebarItem(Icons.food_bank, "Crepe"),
+              Spacer(),
+              sidebarItem(Icons.settings, "Settings")
+            ],
+          ),
+        ),
       ),
     );
   }
