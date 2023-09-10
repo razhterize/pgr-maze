@@ -70,15 +70,21 @@ class MemberTableState extends State<MemberTable> {
               Column(
                 children: [
                   Text("Map"),
-                  Row(
-                    children: [
-                      Text("First Map"),
-                      Text("Second Map"),
-                      Text("Third Map"),
-                    ],
+                  SizedBox(
+                    width: 250,
+                    child: Row(
+                      children: [
+                        Text("First Map"),
+                        Spacer(),
+                        Text("Second Map"),
+                        Spacer(),
+                        Text("Third Map"),
+                      ],
+                    ),
                   )
                 ],
               ),
+              Spacer(),
               Text("Total Energy Damage")
             ],
           ),
