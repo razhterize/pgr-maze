@@ -15,6 +15,7 @@ class _MemberRowState extends State<MemberRow> {
   bool firstMapDetailShown = false;
   bool secondMapDetailShown = false;
   bool thirdMapDetailShown = false;
+  bool selectAll = false;
   @override
   void initState() {
     member = widget.member;
@@ -40,11 +41,11 @@ class _MemberRowState extends State<MemberRow> {
               const Spacer(),
               Text("${member.pgrId}"),
               const Spacer(),
-              energyDamageButton(member.firstMap, firstMapDetailShown),
+              _energyDamageButton(member.firstMap, firstMapDetailShown),
               const Spacer(),
-              energyDamageButton(member.secondMap, secondMapDetailShown),
+              _energyDamageButton(member.secondMap, secondMapDetailShown),
               const Spacer(),
-              energyDamageButton(member.thirdMap, thirdMapDetailShown),
+              _energyDamageButton(member.thirdMap, thirdMapDetailShown),
             ],
           ),
         ],
@@ -52,7 +53,8 @@ class _MemberRowState extends State<MemberRow> {
     );
   }
 
-  Widget energyDamageButton(Map<String, dynamic> energyDetail, bool detailShown) {
+  Widget _energyDamageButton(
+      Map<String, dynamic> energyDetail, bool detailShown) {
     num total = 0;
     energyDetail.values.forEach((energyDamage) => total += energyDamage);
     return MaterialButton(
@@ -60,6 +62,29 @@ class _MemberRowState extends State<MemberRow> {
         detailShown = !detailShown;
       },
       child: Text("$total"),
+    );
+  }
+
+  Widget _energyDamageHeader() {
+    return Row(
+      children: [
+        Checkbox(
+          value: selectAll,
+          onChanged: (value) {
+            setState(() {
+              selectAll = value!;
+            });
+          },
+        )
+      ],
+    );
+  }
+
+  Widget _energyDamageDetail(Map<String, dynamic> energyDetail) {
+    return Row(
+      children: [
+        Text(""),
+      ],
     );
   }
 }
