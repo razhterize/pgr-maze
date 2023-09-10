@@ -22,9 +22,7 @@ class _AppState extends State<App> {
         body: Row(
           children: [
             const Sidebar(),
-            Padding(
-                padding: const EdgeInsets.only(left: 10, right: 10),
-                child: MemberTable(guild: "kuru", pb: pb))
+            MemberTable(guild: "kuru", pb: pb)
           ],
         ),
       ),
