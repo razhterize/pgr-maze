@@ -28,7 +28,7 @@ class Member extends RecordModel {
     totalEnergyDamage = data["total_energy_damage"];
   }
 
-  RecordModel createRecordModel(){
+  RecordModel createRecordModel() {
     Map<String, dynamic> data = {
       "name": name,
       "discord_username": discordUsername,
@@ -39,26 +39,25 @@ class Member extends RecordModel {
       "third_mapo": thirdMap,
       "totalEnergyDamage": totalEnergyDamage
     };
-    RecordModel _record = RecordModel(
-      id: id,
-      created: created,
-      updated: updated,
-      collectionId: collectionId,
-      collectionName: collectionName,
-      data: data
-    );
-    return _record;
+    RecordModel record = RecordModel(
+        id: id,
+        created: created,
+        updated: updated,
+        collectionId: collectionId,
+        collectionName: collectionName,
+        data: data);
+    return record;
   }
 
   Future<void> sendToDatabase(PocketBase pb) async {
-    RecordModel _record = createRecordModel();
-    RecordModel _response = await pb.collection(collectionId).create(body: _record.toJson());
+    RecordModel record = createRecordModel();
+    await pb.collection(collectionId).create(body: record.toJson());
     return;
   }
 
   Future<bool> existInDatabase(PocketBase pb) async {
-    RecordModel _record = await pb.collection(collectionId).getOne(id);
-    if (_record.id != ""){
+    RecordModel record = await pb.collection(collectionId).getOne(id);
+    if (record.id != "") {
       return true;
     }
     return false;
