@@ -32,6 +32,12 @@ class MemberTableState extends State<MemberTable> {
           child: ListView.builder(
             itemCount: 20,
             itemBuilder: (context, index) {
+              if (index == 0) {
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 4, 15, 4),
+                  child: _headers(),
+                );
+              }
               return Padding(
                 padding: const EdgeInsets.fromLTRB(0, 4, 15, 4),
                 child: MemberRow(member: Member.defaultValue()),
@@ -39,6 +45,44 @@ class MemberTableState extends State<MemberTable> {
             },
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _headers() {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.lightBlue),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: const Column(
+        children: [ 
+          Row(
+            children: [
+              Text("Discord Username"),
+              Spacer(),
+              Text("Discord ID"),
+              Spacer(),
+              Text("Name"),
+              Spacer(),
+              Text("PGR ID"),
+              Spacer(),
+              Column(
+                children: [
+                  Text("Map"),
+                  Row(
+                    children: [
+                      Text("First Map"),
+                      Text("Second Map"),
+                      Text("Third Map"),
+                    ],
+                  )
+                ],
+              ),
+              Text("Total Energy Damage")
+            ],
+          ),
+        ],
       ),
     );
   }
