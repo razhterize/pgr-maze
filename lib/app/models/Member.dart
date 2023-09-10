@@ -71,6 +71,7 @@ class Member extends RecordModel {
     collectionId = "zqic8wq6r51e3cb";
     collectionName = "kuru";
     name = "razh";
+    pgrId = 1029234;
     discordId = "09234502938420934823098";
     discordUsername = "alviona";
     firstMap = {
