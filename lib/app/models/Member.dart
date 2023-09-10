@@ -39,6 +39,7 @@ class Member extends RecordModel {
       "third_mapo": thirdMap,
       "totalEnergyDamage": totalEnergyDamage
     };
+
     RecordModel record = RecordModel(
         id: id,
         created: created,
@@ -48,6 +49,10 @@ class Member extends RecordModel {
         data: data);
     return record;
   }
+
+  int firstMapEnergyDamage() => firstMap.values.reduce((a, b) => a + b);
+  int secondMapEnergyDamage() => secondMap.values.reduce((a, b) => a + b);
+  int thirdMapEnergyDamage() => thirdMap.values.reduce((a, b) => a + b);
 
   Future<void> sendToDatabase(PocketBase pb) async {
     RecordModel record = createRecordModel();
