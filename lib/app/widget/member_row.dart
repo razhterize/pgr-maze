@@ -12,6 +12,9 @@ class MemberRow extends StatefulWidget {
 
 class _MemberRowState extends State<MemberRow> {
   late Member member;
+  bool firstMapDetailShown = false;
+  bool secondMapDetailShown = false;
+  bool thirdMapDetailShown = false;
   @override
   void initState() {
     member = widget.member;
@@ -25,17 +28,38 @@ class _MemberRowState extends State<MemberRow> {
         border: Border.all(color: Colors.lightBlue),
         borderRadius: BorderRadius.circular(5),
       ),
-      child: Row(
+      child: Column(
         children: [
-          Text(member.discordUsername),
-          Spacer(),
-          Text(member.discordId),
-          Spacer(),
-          Text(member.name),
-          Spacer(),
-          Text("${member.pgrId}"),
+          Row(
+            children: [
+              Text(member.discordUsername),
+              const Spacer(),
+              Text(member.discordId),
+              const Spacer(),
+              Text(member.name),
+              const Spacer(),
+              Text("${member.pgrId}"),
+              const Spacer(),
+              energyDamageButton(member.firstMap, firstMapDetailShown),
+              const Spacer(),
+              energyDamageButton(member.secondMap, secondMapDetailShown),
+              const Spacer(),
+              energyDamageButton(member.thirdMap, thirdMapDetailShown),
+            ],
+          ),
         ],
       ),
+    );
+  }
+
+  Widget energyDamageButton(Map<String, dynamic> energyDetail, bool detailShown) {
+    num total = 0;
+    energyDetail.values.forEach((energyDamage) => total += energyDamage);
+    return MaterialButton(
+      onPressed: () {
+        detailShown = !detailShown;
+      },
+      child: Text("$total"),
     );
   }
 }
