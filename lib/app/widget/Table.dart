@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:scf_maze/app/models/guild.dart';
+import 'package:scf_maze/app/models/member.dart';
+import 'package:scf_maze/app/widget/member_row.dart';
 
 class MemberTable extends StatefulWidget {
   const MemberTable({super.key, required this.pb, required this.guild});
@@ -13,7 +15,7 @@ class MemberTable extends StatefulWidget {
 }
 
 class MemberTableState extends State<MemberTable> {
-  Guild? _guild;
+  late Guild _guild;
 
   @override
   void initState() {
@@ -23,15 +25,21 @@ class MemberTableState extends State<MemberTable> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        MaterialButton(
-          onPressed: () {
-            _guild!.getAll();
-          },
-          child: Icon(Icons.add),
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: SizedBox(
+          child: ListView.builder(
+            itemCount: 100,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(0, 4, 15, 4),
+                child: MemberRow(member: Member.defaultValue()),
+              );
+            },
+          ),
         ),
-      ],
+      ),
     );
   }
 }
