@@ -43,7 +43,7 @@ class _SidebarState extends State<Sidebar> {
           },
           child: Icon(
             icon,
-            color: Colors.black,
+            color: Colors.white,
           )),
     );
   }
