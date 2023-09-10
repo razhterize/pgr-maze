@@ -30,7 +30,7 @@ class MemberTableState extends State<MemberTable> {
         padding: const EdgeInsets.all(8.0),
         child: SizedBox(
           child: ListView.builder(
-            itemCount: 100,
+            itemCount: 20,
             itemBuilder: (context, index) {
               return Padding(
                 padding: const EdgeInsets.fromLTRB(0, 4, 15, 4),
