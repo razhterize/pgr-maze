@@ -18,11 +18,13 @@ class _AppState extends State<App> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      themeMode: ThemeMode.dark,
+      darkTheme: ThemeData.dark(useMaterial3: true),
       home: Scaffold(
         body: Row(
           children: [
             const Sidebar(),
-            MemberTable(guild: "kuru", pb: pb)
+            GuildTable(guild: "kuru", pb: pb)
           ],
         ),
       ),
