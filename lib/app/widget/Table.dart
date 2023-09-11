@@ -27,17 +27,6 @@ class _GuildTableState extends State<GuildTable> {
     "Third Map",
     "Total Damage",
   ];
-  List<double> columnWidth = [
-    30,
-    100,
-    100,
-    200,
-    100,
-    100,
-    100,
-    150,
-  ];
-
   @override
   void initState() {
     _guild = Guild(widget.pb, widget.guild);
@@ -58,20 +47,26 @@ class _GuildTableState extends State<GuildTable> {
           child: TableView.builder(
             rowCount: 80,
             rowHeight: 32,
-            columns: columnWidth
-                .map((e) => TableColumn(width: maxWidth / 9))
-                .toList(),
+            columns: [
+              for (int i = 0; i < 8; i++) TableColumn(width: maxWidth / 9)
+            ],
+            headerBuilder: (context, contentBuilder) => contentBuilder(
+              context,
+              (context, column) => Material(
+                type: MaterialType.transparency,
+                child: InkWell(
+                  onTap: () {},
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(headers[column]),
+                    ),
+                  ),
+                ),
+              ),
+            ),
             rowBuilder: (context, row, contentBuilder) {
-              if (row == 0) {
-                return InkWell(
-                  child: contentBuilder(context, (context, column) {
-                    return Text(
-                      headers[column],
-                      textAlign: TextAlign.center,
-                    );
-                  }),
-                );
-              }
               return InkWell(
                 child: contentBuilder(
                   context,
@@ -134,7 +129,7 @@ class _GuildTableState extends State<GuildTable> {
       );
     } else {
       return Text(
-        "$rowIndex",
+        "${rowIndex + 1}",
         textAlign: TextAlign.center,
       );
     }
