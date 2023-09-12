@@ -17,6 +17,7 @@ class _AppState extends State<App> {
   // TODO Get Collections based on returned authentication credential
   bool authenticated = false;
   final PocketBase pb = PocketBase(dotenv.env["PB_LOCAL_URL"]!);
+  late RecordAuth recordAuth;
   bool sidebarOpen = false;
 
   @override
@@ -41,16 +42,16 @@ class _AppState extends State<App> {
                 )
               : Login(
                   loginCallback: _loginCallback,
+                  pb: pb,
                 )),
     );
   }
 
-  void _loginCallback(String email, String password) async {
+  void _loginCallback(RecordAuth recordAuth) async {
     // debugPrint("Login Callback with\nEmail: $email, Password: $password");
     // Get authentication shenanigans
-    RecordAuth recordAuth =
-        await pb.collection("users").authWithPassword(email, password);
     // after auth success then you can access collection
+
     var data = await pb.collection("kuru").getFullList();
     {}
     ;
