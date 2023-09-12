@@ -14,8 +14,9 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
+  // TODO Get Collections based on returned authentication credential
   bool authenticated = false;
-  final PocketBase pb = PocketBase(dotenv.env["PB_URL"]!);
+  final PocketBase pb = PocketBase(dotenv.env["PB_LOCAL_URL"]!);
   bool sidebarOpen = false;
 
   @override
@@ -38,11 +39,20 @@ class _AppState extends State<App> {
                     GuildTable(guild: "kuru", pb: pb)
                   ],
                 )
-              : Login(loginCallback: _loginCallback,)),
+              : Login(
+                  loginCallback: _loginCallback,
+                )),
     );
   }
 
-  void _loginCallback(String email, String password) {
-    debugPrint("Login Callback with\nEmail: $email, Password: $password");
+  void _loginCallback(String email, String password) async {
+    // debugPrint("Login Callback with\nEmail: $email, Password: $password");
+    // Get authentication shenanigans
+    RecordAuth recordAuth =
+        await pb.collection("users").authWithPassword(email, password);
+    // after auth success then you can access collection
+    var data = await pb.collection("kuru").getFullList();
+    {}
+    ;
   }
 }
