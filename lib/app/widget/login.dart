@@ -15,12 +15,16 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  final _key = GlobalKey<_LoginState>();
+
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
 
   late RecordAuth recordAuth;
   late Function loginCallback;
   late PocketBase pb;
+
+  bool failedAuthenticate = false;
 
   @override
   void initState() {
@@ -68,12 +72,14 @@ class _LoginState extends State<Login> {
         ListTile(
           // TODO Not empty and match email regex
           leading: Icon(Icons.mail_sharp),
-          title: TextFormField(
-            decoration: const InputDecoration(
-              border: UnderlineInputBorder(),
-              labelText: "Email",
+          title: Form(
+            child: TextFormField(
+              decoration: const InputDecoration(
+                border: UnderlineInputBorder(),
+                labelText: "Email",
+              ),
+              controller: _emailController,
             ),
-            controller: _emailController,
           ),
         ),
         ListTile(
@@ -87,21 +93,40 @@ class _LoginState extends State<Login> {
             controller: _passwordController,
           ),
         ),
-        MaterialButton(
-          minWidth: MediaQuery.of(context).size.width / 2,
-          color: Colors.lightBlueAccent,
-          height: 70,
-          onPressed: () => _submitLogin(),
-          child: Text("LOGIN"),
-        )
+        ElevatedButton(
+          onPressed: _submitLogin,
+          child: Text("Login"),
+        ),
+        failedAuthenticate
+            ? Text(
+                "Authentication Failed, wrong password or email idk, forgot? ask razh LMAO",
+                style: TextStyle(color: Colors.red),
+              )
+            : Container()
       ],
     );
   }
 
   Future<void> _submitLogin() async {
-    recordAuth = await pb
-        .collection("users")
-        .authWithPassword(_emailController.text, _passwordController.text);
+    try {
+      recordAuth = await pb
+          .collection("users")
+          .authWithPassword(_emailController.text, _passwordController.text);
+      if (pb.authStore.isValid) {
+        setState(() {
+          failedAuthenticate = false;
+        });
+        loginCallback(recordAuth);
+      }
+    } on ClientException catch (e) {
+      if (e.response["message"] == "Failed to authenticate." &&
+          e.statusCode == 400) {
+        debugPrint("Failed to authenticate");
+        setState(() {
+          failedAuthenticate = true;
+        });
+      }
+    }
     var data = await pb.collection("kuru").getFullList();
   }
 }
