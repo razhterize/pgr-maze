@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:material_table_view/material_table_view.dart';
-import 'package:pocketbase/pocketbase.dart';
 import 'package:scf_maze/app/models/guild.dart';
 import 'package:scf_maze/app/models/member.dart';
 
 class GuildTable extends StatefulWidget {
-  const GuildTable({super.key, required this.pb, required this.guild});
+  GuildTable({super.key, required this.guilds, required this.activeIndex});
 
-  final PocketBase pb;
-  final String guild;
+  final List<Guild> guilds;
+  int activeIndex = 0;
 
   @override
   State<GuildTable> createState() => _GuildTableState();
 }
 
 class _GuildTableState extends State<GuildTable> {
-  late Guild _guild;
+  late List<Guild> _guilds;
 
   List<String> headers = [
     "No",
@@ -29,14 +28,14 @@ class _GuildTableState extends State<GuildTable> {
   ];
   @override
   void initState() {
-    _guild = Guild(widget.pb, widget.guild);
+    _guilds = widget.guilds;
+    debugPrint("Current Guild Table: ${_guilds[widget.activeIndex].name}");
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     double maxWidth = MediaQuery.of(context).size.width;
-    double maxHeight = MediaQuery.of(context).size.height;
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(4, 8, 15, 8),
@@ -45,7 +44,7 @@ class _GuildTableState extends State<GuildTable> {
               border: Border.all(color: Colors.lightBlueAccent),
               borderRadius: BorderRadius.circular(10)),
           child: TableView.builder(
-            rowCount: 80,
+            rowCount: _guilds[widget.activeIndex].totalMembers,
             rowHeight: 32,
             columns: [
               for (int i = 0; i < 8; i++) TableColumn(width: maxWidth / 9)
@@ -71,7 +70,8 @@ class _GuildTableState extends State<GuildTable> {
                 child: contentBuilder(
                   context,
                   (context, column) {
-                    return _columnContent(row, column, Member.defaultValue());
+                    return _columnContent(
+                        row, column, _guilds[widget.activeIndex].members[row]);
                   },
                 ),
               );

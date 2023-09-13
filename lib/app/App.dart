@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:scf_maze/app/models/guild.dart';
 import 'package:scf_maze/app/widget/login.dart';
 import 'package:scf_maze/app/widget/table.dart';
 import 'widget/sidebar.dart';
@@ -18,7 +19,10 @@ class _AppState extends State<App> {
   bool authenticated = false;
   final PocketBase pb = PocketBase(dotenv.env["PB_LOCAL_URL"]!);
   late RecordAuth recordAuth;
-  bool sidebarOpen = false;
+  List<Guild> guildList = [];
+
+  int selectedGuildIndex = 0;
+  List<dynamic> managedGuilds = [];
 
   @override
   void initState() {
@@ -36,8 +40,13 @@ class _AppState extends State<App> {
           body: authenticated
               ? Row(
                   children: [
-                    const Sidebar(),
-                    GuildTable(guild: "kuru", pb: pb)
+                    Sidebar(
+                      managedGuilds: managedGuilds,
+                      callbackFunction: _sidebarCallback,
+                    ),
+                    (authenticated && managedGuilds.isNotEmpty)
+                        ? GuildTable(guilds: guildList, activeIndex: selectedGuildIndex,)
+                        : Text("Something went wrong...")
                   ],
                 )
               : Login(
@@ -47,13 +56,19 @@ class _AppState extends State<App> {
     );
   }
 
-  void _loginCallback(RecordAuth recordAuth) async {
-    // debugPrint("Login Callback with\nEmail: $email, Password: $password");
-    // Get authentication shenanigans
-    // after auth success then you can access collection
+  void _sidebarCallback(int index) {
+    setState(() {
+      selectedGuildIndex = index;
+    });
+  }
 
-    var data = await pb.collection("kuru").getFullList();
-    {}
-    ;
+  void _loginCallback(RecordAuth recordAuth) {
+    if (pb.authStore.isValid) {
+      setState(() {
+        authenticated = true;
+      });
+    }
+    managedGuilds = recordAuth.record?.data["managed_guilds"];
+    guildList = managedGuilds.map((guild) => Guild(pb, guild)).toList();
   }
 }
