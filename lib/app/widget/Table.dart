@@ -4,10 +4,15 @@ import 'package:scf_maze/app/models/guild.dart';
 import 'package:scf_maze/app/models/member.dart';
 
 class GuildTable extends StatefulWidget {
-  GuildTable({super.key, required this.guilds, required this.activeIndex});
+  const GuildTable(
+      {super.key,
+      required this.guilds,
+      required this.activeIndex,
+      required this.filter});
 
   final List<Guild> guilds;
-  int activeIndex = 0;
+  final int activeIndex;
+  final String filter;
 
   @override
   State<GuildTable> createState() => _GuildTableState();
@@ -29,12 +34,12 @@ class _GuildTableState extends State<GuildTable> {
   @override
   void initState() {
     _guilds = widget.guilds;
-    debugPrint("Current Guild Table: ${_guilds[widget.activeIndex].name}");
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("Current Table: ${_guilds[widget.activeIndex].name}");
     double maxWidth = MediaQuery.of(context).size.width;
     return Expanded(
       child: Padding(
@@ -43,39 +48,53 @@ class _GuildTableState extends State<GuildTable> {
           decoration: BoxDecoration(
               border: Border.all(color: Colors.lightBlueAccent),
               borderRadius: BorderRadius.circular(10)),
-          child: TableView.builder(
-            rowCount: _guilds[widget.activeIndex].totalMembers,
-            rowHeight: 32,
-            columns: [
-              for (int i = 0; i < 8; i++) TableColumn(width: maxWidth / 9)
-            ],
-            headerBuilder: (context, contentBuilder) => contentBuilder(
-              context,
-              (context, column) => Material(
-                type: MaterialType.transparency,
-                child: InkWell(
-                  onTap: () {},
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text(headers[column]),
+          child: SizedBox(
+            width: maxWidth,
+            child: TableView.builder(
+              rowCount: _guilds[widget.activeIndex].totalMembers,
+              rowHeight: 32,
+              columns: [
+                for (int i = 0; i < 8; i++) TableColumn(width: maxWidth / 9)
+              ],
+              headerBuilder: (context, contentBuilder) => contentBuilder(
+                context,
+                (context, column) => Material(
+                  type: MaterialType.transparency,
+                  child: InkWell(
+                    onTap: () {},
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Text(headers[column]),
+                      ),
                     ),
                   ),
                 ),
               ),
+              rowBuilder: (context, row, contentBuilder) {
+                return InkWell(
+                  child: contentBuilder(
+                    context,
+                    (context, column) {
+                      if (widget.filter == "") {
+                        return _columnContent(
+                          row,
+                          column,
+                          _guilds[widget.activeIndex].members[row],
+                        );
+                      } else {
+                        return _columnContent(
+                            row,
+                            column,
+                            _guilds[widget.activeIndex]
+                                .filterByName(widget.filter)[row]);
+                      }
+                    },
+                  ),
+                );
+              },
             ),
-            rowBuilder: (context, row, contentBuilder) {
-              return InkWell(
-                child: contentBuilder(
-                  context,
-                  (context, column) {
-                    return _columnContent(
-                        row, column, _guilds[widget.activeIndex].members[row]);
-                  },
-                ),
-              );
-            },
           ),
         ),
       ),
