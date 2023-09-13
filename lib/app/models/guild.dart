@@ -3,33 +3,41 @@ import 'package:pocketbase/pocketbase.dart';
 import 'package:scf_maze/app/models/member.dart';
 
 class Guild {
-  PocketBase? _pb;
-  RecordService? _collection;
+  late PocketBase _pb;
+  late RecordService _collection;
   late String name;
   List<Member> members = [];
   int totalMembers = 0;
 
   Guild(PocketBase pb, String collection) {
     _pb = pb;
-    _collection = _pb?.collection(collection);
+    _collection = _pb.collection(collection);
     name = collection;
     getAll();
     debugPrint("New Instance of $collection");
   }
 
   Future<void> getAll({String filter = ""}) async {
-
-    List<RecordModel>? data = await _collection?.getFullList(filter: filter);
-    data?.forEach((record) {
+    List<RecordModel>? data = await _collection.getFullList(filter: filter);
+    for (var record in data) {
       members.add(Member(record));
-    });
+    }
     totalMembers = members.length;
   }
 
-  Future<void> syncWithDatabase() async{
-    // TODO upload all records to database
+  Future<void> sendToDatabase() async {
+    for (var member in members) {
+      member.createInDatabase(_pb);
+    }
   }
 
   List<Member> getMembers() => members;
   void addMember(Member member) => members.add(member);
+
+  List<Member> filterByName(String name) =>
+      members.where((member) => member.name.contains(name)).toList();
+
+  List<Member> filterById(int id) => members
+      .where((member) => (member.pgrId as String).contains(id as String))
+      .toList();
 }
