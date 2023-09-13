@@ -1,13 +1,45 @@
 import 'package:flutter/material.dart';
 
 class Sidebar extends StatefulWidget {
-  const Sidebar({super.key});
+  const Sidebar(
+      {super.key, required this.managedGuilds, required this.callbackFunction});
+
+  final List<dynamic> managedGuilds;
+  final Function(int) callbackFunction;
 
   @override
   State<Sidebar> createState() => _SidebarState();
 }
 
 class _SidebarState extends State<Sidebar> {
+  // Turu: Whip
+  // Kuru: Herta spinning
+  // Crepe: wellp, crepe
+  // Tensura: slime
+  // Ancient Weapon: rusted sword
+  // Arcad: TBA
+  // Avarie Echo: TBA
+
+  late List<dynamic> managedGuilds;
+  late Function(int) callbackFunction;
+
+  final Map<String, IconData> guildIcons = {
+    "turu": Icons.bed,
+    "kuru": Icons.spoke_outlined,
+    "crepe": Icons.food_bank,
+    "tensura": Icons.animation_outlined,
+    "avarice_echo": Icons.money_sharp,
+    "arcadian": Icons.abc,
+    "ancient_weapon": Icons.abc
+  };
+
+  @override
+  void initState() {
+    managedGuilds = widget.managedGuilds;
+    callbackFunction = widget.callbackFunction;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -20,26 +52,28 @@ class _SidebarState extends State<Sidebar> {
         child: SizedBox(
           width: 50,
           child: Column(
-            children: [
-              sidebarItem(Icons.bed_outlined, "Main"),
-              sidebarItem(Icons.alarm, "Kuru"),
-              sidebarItem(Icons.food_bank, "Crepe"),
-              sidebarItem(Icons.add, "New"),
-              const Spacer(),
-              sidebarItem(Icons.settings, "Settings")
-            ],
+            children: _guildSwitcher(),
           ),
         ),
       ),
     );
   }
 
-  Widget sidebarItem(IconData icon, String title) {
+  List<Widget> _guildSwitcher() {
+    List<Widget> items = [];
+    for (int i = 0; i < managedGuilds.length; i++) {
+      String guild = managedGuilds[i];
+      items.add(sidebarItem(guildIcons[guild]!, guild, i));
+    }
+    return items;
+  }
+
+  Widget sidebarItem(IconData icon, String title, int index) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(2, 8, 2, 8),
       child: MaterialButton(
           onPressed: () {
-            setActiveTable(title);
+            callbackFunction(index);
           },
           child: Icon(
             icon,
