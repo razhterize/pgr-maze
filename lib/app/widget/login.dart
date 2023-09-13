@@ -1,7 +1,4 @@
-// ignore_for_file: unused_field, prefer_final_fields, prefer_const_constructors
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:pocketbase/pocketbase.dart';
 
 class Login extends StatefulWidget {
@@ -15,10 +12,9 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  final _key = GlobalKey<_LoginState>();
 
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController(text: "razh");
+  final TextEditingController _passwordController = TextEditingController(text: "AbsoluteJudgement");
 
   late RecordAuth recordAuth;
   late Function loginCallback;
@@ -56,10 +52,10 @@ class _LoginState extends State<Login> {
           padding: const EdgeInsets.all(8.0),
           child: CircleAvatar(
             radius: MediaQuery.of(context).size.height / 6,
-            backgroundImage: AssetImage("assets/bianca.jpg"),
+            backgroundImage: const AssetImage("assets/bianca.jpg"),
           ),
         ),
-        Text(
+        const Text(
           "Premium Slavery Management App",
           textAlign: TextAlign.center,
           softWrap: true,
@@ -71,12 +67,12 @@ class _LoginState extends State<Login> {
         ),
         ListTile(
           // TODO Not empty and match email regex
-          leading: Icon(Icons.mail_sharp),
+          leading: const Icon(Icons.alternate_email_outlined),
           title: Form(
             child: TextFormField(
               decoration: const InputDecoration(
                 border: UnderlineInputBorder(),
-                labelText: "Email",
+                labelText: "Username or Email",
               ),
               controller: _emailController,
             ),
@@ -84,7 +80,7 @@ class _LoginState extends State<Login> {
         ),
         ListTile(
           // TODO Not empty and censor password with asterisk (*)
-          leading: Icon(Icons.lock_sharp),
+          leading: const Icon(Icons.lock_sharp),
           title: TextFormField(
             decoration: const InputDecoration(
               border: UnderlineInputBorder(),
@@ -95,10 +91,10 @@ class _LoginState extends State<Login> {
         ),
         ElevatedButton(
           onPressed: _submitLogin,
-          child: Text("Login"),
+          child: const Text("Login"),
         ),
         failedAuthenticate
-            ? Text(
+            ? const Text(
                 "Authentication Failed, wrong password or email idk, forgot? ask razh LMAO",
                 style: TextStyle(color: Colors.red),
               )
@@ -127,6 +123,5 @@ class _LoginState extends State<Login> {
         });
       }
     }
-    var data = await pb.collection("kuru").getFullList();
   }
 }
