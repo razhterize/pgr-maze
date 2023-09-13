@@ -28,6 +28,52 @@ class Member extends RecordModel {
     totalEnergyDamage = data["total_energy_damage"];
   }
 
+  Member.newMember(String guild, String name, int pgrId, String discordUsername,
+      String discordId) {
+    name = name;
+    pgrId = pgrId;
+    discordUsername = discordUsername;
+    discordId = discordId;
+    collectionName = guild;
+    totalEnergyDamage = 0;
+    firstMap = {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0,
+      "10": 0
+    };
+    secondMap = {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0,
+      "10": 0
+    };
+    thirdMap = {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0,
+      "10": 0
+    };
+  }
+
   RecordModel createRecordModel() {
     Map<String, dynamic> data = {
       "name": name,
@@ -36,7 +82,7 @@ class Member extends RecordModel {
       "pgr_id": pgrId,
       "first_map": firstMap,
       "second_map": secondMap,
-      "third_mapo": thirdMap,
+      "third_map": thirdMap,
       "totalEnergyDamage": totalEnergyDamage
     };
 
@@ -54,30 +100,33 @@ class Member extends RecordModel {
   int secondMapEnergyDamage() => secondMap.values.reduce((a, b) => a + b);
   int thirdMapEnergyDamage() => thirdMap.values.reduce((a, b) => a + b);
 
-  Future<void> sendToDatabase(PocketBase pb) async {
+  Future<void> createInDatabase(PocketBase pb) async {
     RecordModel record = createRecordModel();
-    await pb.collection(collectionId).create(body: record.toJson());
-    return;
+    await pb.collection(collectionName).create(body: record.toJson());
   }
 
   Future<bool> existInDatabase(PocketBase pb) async {
-    RecordModel record = await pb.collection(collectionId).getOne(id);
+    RecordModel record = await pb.collection(collectionName).getOne(id);
     if (record.id != "") {
       return true;
     }
     return false;
   }
+  @override
+  String toString(){
+    return "id: $id\nGuild: $collectionName\nName: $name\nPGR ID: $pgrId\nDiscord Username: $discordUsername\nDiscord ID: $discordId";
+  }
 
   Member.defaultValue() {
-    id = "oaipwjdoij";
-    updated = "2023-09-09 16:14:24.369Z";
-    created = "2023-09-09 16:14:24.369Z";
-    collectionId = "zqic8wq6r51e3cb";
-    collectionName = "kuru";
-    name = "razh";
-    pgrId = 1029234;
-    discordId = "09234502938420934823098";
-    discordUsername = "alviona";
+    id = "";
+    updated = "";
+    created = "";
+    collectionId = "";
+    collectionName = "";
+    name = "";
+    pgrId = 0;
+    discordId = "";
+    discordUsername = "";
     firstMap = {
       "1": 0,
       "2": 0,
