@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:material_table_view/material_table_view.dart';
 import 'package:scf_maze/app/models/guild.dart';
 import 'package:scf_maze/app/models/member.dart';
@@ -21,12 +22,13 @@ class GuildTable extends StatefulWidget {
 }
 
 class _GuildTableState extends State<GuildTable> {
+  final _formKey = GlobalKey<FormState>();
   late List<Guild> _guilds;
 
   bool selectAll = false;
 
   List<String> headers = [
-    "No",
+    "Action",
     "Name",
     "PGR ID",
     "Discord Username",
@@ -57,7 +59,9 @@ class _GuildTableState extends State<GuildTable> {
           child: SizedBox(
             width: maxWidth,
             child: TableView.builder(
-              rowCount: _guilds[widget.activeIndex].filterByName(widget.filter).length,
+              rowCount: _guilds[widget.activeIndex]
+                  .filterByName(widget.filter)
+                  .length,
               rowHeight: 32,
               columns: [
                 TableColumn(width: maxWidth / 20),
@@ -207,10 +211,135 @@ class _GuildTableState extends State<GuildTable> {
         textAlign: TextAlign.center,
       );
     } else {
-      return Text(
-        "${rowIndex + 1}",
-        textAlign: TextAlign.center,
-      );
+      return IconButton(
+          onPressed: () => _openEditMember(context, member),
+          icon: const Center(child: Icon(Icons.edit_square)));
     }
+  }
+
+  void _openEditMember(BuildContext context, Member member) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: _editMemberContent(context, member),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text("Delete Member"),
+                      content: Text(
+                          "Are you sure to delete ${member.name} from ${member.collectionName.replaceAll('_', ' ')}"),
+                      actions: [
+                        ElevatedButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text("CANCEL")),
+                        ElevatedButton(
+                            onPressed: () => member
+                                .delete(_guilds.first.pb)
+                                .then((value) => Navigator.pop(context)),
+                            child: const Text("DELETE")),
+                      ],
+                    );
+                  },
+                ).then((value) => Navigator.pop(context));
+              },
+              child: const Text("Delete Member"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  member.update(_guilds.first.pb);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Saving...')),
+                  );
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text("Save"),
+            ),
+          ],
+        );
+      },
+    ).then((value) {
+      setState(() {
+        _guilds[widget.activeIndex].getAll();
+      });
+    });
+  }
+
+  Widget _editMemberContent(BuildContext context, Member member) {
+    TextEditingController name = TextEditingController(text: member.name);
+    TextEditingController pgrId =
+        TextEditingController(text: "${member.pgrId}");
+    TextEditingController discordId =
+        TextEditingController(text: member.discordId);
+    TextEditingController discordUsername =
+        TextEditingController(text: member.discordUsername);
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.3,
+        height: MediaQuery.of(context).size.height,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                decoration: const InputDecoration(label: Text("Name")),
+                controller: name,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Name cannot be empty';
+                  }
+                  return null;
+                },
+                onChanged: (value) => member.name = value,
+                onTapOutside: (event) => member.name = name.text,
+              ),
+              TextFormField(
+                decoration: const InputDecoration(label: Text("PGR ID")),
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                controller: pgrId,
+                validator: (value) {
+                  if (value == null || value.isEmpty || value == "0") {
+                    return 'PGR ID cannot be empty or 0';
+                  }
+                  return null;
+                },
+                onChanged: (value) {
+                  if (value == "" || value.isEmpty) value = "0";
+                  member.pgrId = int.tryParse(value) as int;
+                },
+                onTapOutside: (event) {
+                  if (pgrId.text == "" || pgrId.text.isEmpty) pgrId.text = "0";
+                  member.pgrId = int.tryParse(pgrId.text) as int;
+                },
+              ),
+              TextFormField(
+                decoration:
+                    const InputDecoration(label: Text("Discord Username")),
+                controller: discordUsername,
+                onChanged: (value) => member.discordUsername = value,
+                onTapOutside: (event) =>
+                    member.discordUsername = discordUsername.text,
+              ),
+              TextFormField(
+                decoration: const InputDecoration(label: Text("Discord ID")),
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                controller: discordId,
+                onChanged: (value) => member.discordId = value,
+                onTapOutside: (event) => member.discordId = discordId.text,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
