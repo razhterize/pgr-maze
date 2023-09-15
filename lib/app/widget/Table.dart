@@ -8,11 +8,13 @@ class GuildTable extends StatefulWidget {
       {super.key,
       required this.guilds,
       required this.activeIndex,
-      required this.filter});
+      required this.filter,
+      required this.callbackFunction});
 
   final List<Guild> guilds;
   final int activeIndex;
   final String filter;
+  final Function(Member, String) callbackFunction;
 
   @override
   State<GuildTable> createState() => _GuildTableState();
@@ -20,6 +22,8 @@ class GuildTable extends StatefulWidget {
 
 class _GuildTableState extends State<GuildTable> {
   late List<Guild> _guilds;
+
+  bool selectAll = false;
 
   List<String> headers = [
     "No",
@@ -39,11 +43,13 @@ class _GuildTableState extends State<GuildTable> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("Filter: ${widget.filter}");
     debugPrint("Current Table: ${_guilds[widget.activeIndex].name}");
     double maxWidth = MediaQuery.of(context).size.width;
     return Expanded(
+      flex: 5,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(4, 8, 15, 8),
+        padding: const EdgeInsets.fromLTRB(4, 8, 12, 8),
         child: Container(
           decoration: BoxDecoration(
               border: Border.all(color: Colors.lightBlueAccent),
@@ -51,10 +57,18 @@ class _GuildTableState extends State<GuildTable> {
           child: SizedBox(
             width: maxWidth,
             child: TableView.builder(
-              rowCount: _guilds[widget.activeIndex].totalMembers,
+              rowCount: _guilds[widget.activeIndex].filterByName(widget.filter).length,
               rowHeight: 32,
               columns: [
-                for (int i = 0; i < 8; i++) TableColumn(width: maxWidth / 9)
+                TableColumn(width: maxWidth / 20),
+                TableColumn(width: maxWidth / 20),
+                TableColumn(width: maxWidth / 10),
+                TableColumn(width: maxWidth / 10),
+                TableColumn(width: maxWidth / 8),
+                TableColumn(width: maxWidth / 13),
+                TableColumn(width: maxWidth / 13),
+                TableColumn(width: maxWidth / 13),
+                TableColumn(width: maxWidth / 10),
               ],
               headerBuilder: (context, contentBuilder) => contentBuilder(
                 context,
@@ -66,7 +80,20 @@ class _GuildTableState extends State<GuildTable> {
                       padding: const EdgeInsets.all(4),
                       child: Align(
                         alignment: Alignment.center,
-                        child: Text(headers[column]),
+                        child: (column == 0)
+                            ? Checkbox(
+                                value: selectAll,
+                                onChanged: (value) {
+                                  for (var member
+                                      in _guilds[widget.activeIndex].members) {
+                                    member.selected = value!;
+                                  }
+                                  setState(() {
+                                    selectAll = value!;
+                                  });
+                                },
+                              )
+                            : Text(headers[column - 1]),
                       ),
                     ),
                   ),
@@ -102,46 +129,79 @@ class _GuildTableState extends State<GuildTable> {
   }
 
   Widget _columnContent(int rowIndex, int columnIndex, Member member) {
-    if (columnIndex == 1) {
+    if (columnIndex == 0) {
+      return Checkbox(
+        value: member.selected,
+        onChanged: (value) {
+          setState(() {
+            member.selected = value!;
+          });
+        },
+      );
+    } else if (columnIndex == 2) {
       return Text(
         member.name,
         textAlign: TextAlign.center,
       );
-    } else if (columnIndex == 2) {
+    } else if (columnIndex == 3) {
       return Text(
         "${member.pgrId}",
         textAlign: TextAlign.center,
       );
-    } else if (columnIndex == 3) {
+    } else if (columnIndex == 4) {
       return Text(
         member.discordUsername,
         textAlign: TextAlign.center,
       );
-    } else if (columnIndex == 4) {
-      return MaterialButton(
-        onPressed: () {},
-        child: Text(
-          "${member.firstMapEnergyDamage()}",
-          textAlign: TextAlign.center,
-        ),
-      );
     } else if (columnIndex == 5) {
-      return MaterialButton(
-        onPressed: () {},
-        child: Text(
-          "${member.secondMapEnergyDamage()}",
-          textAlign: TextAlign.center,
+      return Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: Container(
+          color: Colors.lightBlue,
+          child: MaterialButton(
+            onPressed: () {
+              widget.callbackFunction(member, "first");
+            },
+            child: Text(
+              "${member.energyDamagePerMap("first")}",
+              textAlign: TextAlign.center,
+            ),
+          ),
         ),
       );
     } else if (columnIndex == 6) {
-      return MaterialButton(
-        onPressed: () {},
-        child: Text(
-          "${member.thirdMapEnergyDamage()}",
-          textAlign: TextAlign.center,
+      return Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: Container(
+          color: Colors.lightBlue,
+          child: MaterialButton(
+            onPressed: () {
+              widget.callbackFunction(member, "second");
+            },
+            child: Text(
+              "${member.energyDamagePerMap("second")}",
+              textAlign: TextAlign.center,
+            ),
+          ),
         ),
       );
     } else if (columnIndex == 7) {
+      return Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: Container(
+          color: Colors.lightBlue,
+          child: MaterialButton(
+            onPressed: () {
+              widget.callbackFunction(member, "third");
+            },
+            child: Text(
+              "${member.energyDamagePerMap("third")}",
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    } else if (columnIndex == 8) {
       return Text(
         "${member.totalEnergyDamage}",
         textAlign: TextAlign.center,
