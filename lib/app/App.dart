@@ -16,6 +16,8 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
+  final _formKey = GlobalKey<FormState>();
+
   bool authenticated = false;
   final PocketBase pb = PocketBase(dotenv.env["PB_LOCAL_URL"]!);
   late RecordAuth recordAuth;
@@ -121,7 +123,15 @@ class _AppState extends State<App> {
                       content: _newMemberWidget(context, newMember),
                       actions: [
                         ElevatedButton(
-                          onPressed: () => newMember.createInDatabase(pb),
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              newMember.createInDatabase(pb);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Processing Data')),
+                              );
+                            }
+                          },
                           child: const Text("Create Member"),
                         ),
                       ],
@@ -198,6 +208,7 @@ class _AppState extends State<App> {
         width: MediaQuery.of(context).size.width * 0.3,
         height: MediaQuery.of(context).size.height,
         child: Form(
+          key: _formKey,
           child: Column(
             children: [
               DropdownButtonFormField(
@@ -213,37 +224,51 @@ class _AppState extends State<App> {
               TextFormField(
                 decoration: const InputDecoration(hintText: "Name"),
                 controller: name,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Name cannot be empty';
+                  }
+                  return null;
+                },
                 onChanged: (value) => newMember.name = value,
+                onTapOutside: (event) => newMember.name = name.text,
               ),
               TextFormField(
                 decoration: const InputDecoration(hintText: "PGR ID"),
                 keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 controller: pgrId,
-                onChanged: (value) => newMember.pgrId = int.tryParse(value)!,
+                validator: (value) {
+                  if (value == null || value.isEmpty || value == "0") {
+                    return 'PGR ID cannot be empty or 0';
+                  }
+                  return null;
+                },
+                onChanged: (value) {
+                  if (value == "" || value.isEmpty) value = "0";
+                  newMember.pgrId = int.tryParse(value) as int;
+                },
+                onTapOutside: (event) {
+                  if (pgrId.text == "" || pgrId.text.isEmpty) pgrId.text = "0";
+                  newMember.pgrId = int.tryParse(pgrId.text) as int;
+
+                },
               ),
               TextFormField(
                 decoration: const InputDecoration(hintText: "Discord Username"),
                 controller: discordUsername,
                 onChanged: (value) => newMember.discordUsername = value,
+                onTapOutside: (event) =>
+                    newMember.discordUsername = discordUsername.text,
               ),
               TextFormField(
                 decoration: const InputDecoration(hintText: "Discord ID"),
                 keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 controller: discordId,
                 onChanged: (value) => newMember.discordId = value,
+                onTapOutside: (event) => newMember.discordId = discordId.text,
               ),
-              const SizedBox(
-                height: 50,
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  newMember.discordId = discordId.text;
-                  newMember.name = name.text;
-                  newMember.discordUsername = discordUsername.text;
-                  newMember.pgrId = int.tryParse(pgrId.text)!;
-                },
-                child: const Text("Verify"),
-              )
             ],
           ),
         ),
