@@ -6,10 +6,9 @@ class Member extends RecordModel {
   late String discordUsername;
   late String discordId;
   late int pgrId;
-  late Map<String, dynamic> firstMap;
-  late Map<String, dynamic> secondMap;
-  late Map<String, dynamic> thirdMap;
+  late Map<String, dynamic> mapEnergyDamage;
   late int totalEnergyDamage = 0;
+  bool selected = false;
 
   Member(RecordModel record) {
     Map<String, dynamic> data = record.data;
@@ -22,9 +21,7 @@ class Member extends RecordModel {
     discordUsername = data["discord_username"];
     discordId = data["discord_id"];
     pgrId = data["pgr_id"];
-    firstMap = data["first_map"];
-    secondMap = data["second_map"];
-    thirdMap = data["third_map"];
+    mapEnergyDamage = data["map_data"];
     totalEnergyDamage = data["total_energy_damage"];
   }
 
@@ -36,41 +33,10 @@ class Member extends RecordModel {
     discordId = discordId;
     collectionName = guild;
     totalEnergyDamage = 0;
-    firstMap = {
-      "1": 0,
-      "2": 0,
-      "3": 0,
-      "4": 0,
-      "5": 0,
-      "6": 0,
-      "7": 0,
-      "8": 0,
-      "9": 0,
-      "10": 0
-    };
-    secondMap = {
-      "1": 0,
-      "2": 0,
-      "3": 0,
-      "4": 0,
-      "5": 0,
-      "6": 0,
-      "7": 0,
-      "8": 0,
-      "9": 0,
-      "10": 0
-    };
-    thirdMap = {
-      "1": 0,
-      "2": 0,
-      "3": 0,
-      "4": 0,
-      "5": 0,
-      "6": 0,
-      "7": 0,
-      "8": 0,
-      "9": 0,
-      "10": 0
+    mapEnergyDamage = {
+      "first": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      "second": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      "third": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     };
   }
 
@@ -80,9 +46,7 @@ class Member extends RecordModel {
       "discord_username": discordUsername,
       "discord_id": discordId,
       "pgr_id": pgrId,
-      "first_map": firstMap,
-      "second_map": secondMap,
-      "third_map": thirdMap,
+      "map_data": mapEnergyDamage,
       "totalEnergyDamage": totalEnergyDamage
     };
 
@@ -96,9 +60,8 @@ class Member extends RecordModel {
     return record;
   }
 
-  int firstMapEnergyDamage() => firstMap.values.reduce((a, b) => a + b);
-  int secondMapEnergyDamage() => secondMap.values.reduce((a, b) => a + b);
-  int thirdMapEnergyDamage() => thirdMap.values.reduce((a, b) => a + b);
+  int energyDamagePerMap(String map) => mapEnergyDamage[map]!
+      .fold(0, (previous, current) => previous + current);
 
   Future<void> createInDatabase(PocketBase pb) async {
     RecordModel record = createRecordModel();
@@ -112,8 +75,18 @@ class Member extends RecordModel {
     }
     return false;
   }
+
+  Future<void> update(PocketBase pb) async{
+    RecordModel record = createRecordModel();
+    await pb.collection(collectionName).update(id, body: record.toJson());
+  }
+
+  Future<void> delete(PocketBase pb) async{
+    await pb.collection(collectionName).delete(id);
+  }
+
   @override
-  String toString(){
+  String toString() {
     return "id: $id\nGuild: $collectionName\nName: $name\nPGR ID: $pgrId\nDiscord Username: $discordUsername\nDiscord ID: $discordId";
   }
 
@@ -127,41 +100,10 @@ class Member extends RecordModel {
     pgrId = 0;
     discordId = "";
     discordUsername = "";
-    firstMap = {
-      "1": 0,
-      "2": 0,
-      "3": 0,
-      "4": 0,
-      "5": 0,
-      "6": 0,
-      "7": 0,
-      "8": 0,
-      "9": 0,
-      "10": 0
-    };
-    secondMap = {
-      "1": 0,
-      "2": 0,
-      "3": 0,
-      "4": 0,
-      "5": 0,
-      "6": 0,
-      "7": 0,
-      "8": 0,
-      "9": 0,
-      "10": 0
-    };
-    thirdMap = {
-      "1": 0,
-      "2": 0,
-      "3": 0,
-      "4": 0,
-      "5": 0,
-      "6": 0,
-      "7": 0,
-      "8": 0,
-      "9": 0,
-      "10": 0
+    mapEnergyDamage = {
+      "first": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      "second": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      "third": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     };
     totalEnergyDamage = 0;
   }
