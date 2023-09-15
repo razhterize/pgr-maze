@@ -274,8 +274,6 @@ class _GuildTableState extends State<GuildTable> {
       setState(() {
         _guilds[widget.activeIndex].getAll();
       });
-      {}
-      ;
     });
   }
 
