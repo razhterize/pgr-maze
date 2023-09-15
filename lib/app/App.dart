@@ -15,7 +15,6 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  // TODO Get Collections based on returned authentication credential
   bool authenticated = false;
   final PocketBase pb = PocketBase(dotenv.env["PB_LOCAL_URL"]!);
   late RecordAuth recordAuth;
@@ -72,41 +71,7 @@ class _AppState extends State<App> {
         if (authenticated && managedGuilds.isNotEmpty)
           Column(
             children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width - 80,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 2, 8, 0),
-                  child: Row(
-                    children: [
-                      _searchBar(),
-                      const Spacer(),
-                      ElevatedButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              Member newMember = Member.defaultValue();
-                              return AlertDialog(
-                                title: const Text("Add Member"),
-                                // scrollable: true,
-                                content: _newMemberWidget(context, newMember),
-                                actions: [
-                                  ElevatedButton(
-                                    onPressed: () =>
-                                        newMember.createInDatabase(pb),
-                                    child: const Text("Create Member"),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        child: const Text("New Member"),
-                      )
-                    ],
-                  ),
-                ),
-              ),
+              menuBar(context),
               Expanded(
                 child: TableView(
                   guilds: guildList,
@@ -118,7 +83,45 @@ class _AppState extends State<App> {
           )
         else
           const Text("Something went wrong..."),
+
       ],
+    );
+  }
+
+  SizedBox menuBar(BuildContext context) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width - 80,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 2, 8, 0),
+        child: Row(
+          children: [
+            _searchBar(),
+            const Spacer(),
+            ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    Member newMember = Member.defaultValue();
+                    return AlertDialog(
+                      title: const Text("Add Member"),
+                      // scrollable: true,
+                      content: _newMemberWidget(context, newMember),
+                      actions: [
+                        ElevatedButton(
+                          onPressed: () => newMember.createInDatabase(pb),
+                          child: const Text("Create Member"),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: const Text("New Member"),
+            )
+          ],
+        ),
+      ),
     );
   }
 
@@ -132,7 +135,11 @@ class _AppState extends State<App> {
             leading: _searchModeDropdown(),
             controller: controller,
             hintText: "Search $searchMode",
-            onChanged: (value) => filter = value,
+            onChanged: (value) {
+              setState(() {
+                filter = value;
+              });
+            },
           ),
         );
       },
@@ -168,10 +175,10 @@ class _AppState extends State<App> {
   }
 
   Widget _newMemberWidget(BuildContext context, Member newMember) {
-    TextEditingController _name = TextEditingController();
-    TextEditingController _pgrId = TextEditingController();
-    TextEditingController _discordId = TextEditingController();
-    TextEditingController _discordUsername = TextEditingController();
+    TextEditingController name = TextEditingController();
+    TextEditingController pgrId = TextEditingController();
+    TextEditingController discordId = TextEditingController();
+    TextEditingController discordUsername = TextEditingController();
     newMember.collectionName = "turu";
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -193,37 +200,37 @@ class _AppState extends State<App> {
               ),
               TextFormField(
                 decoration: const InputDecoration(hintText: "Name"),
-                controller: _name,
+                controller: name,
                 onChanged: (value) => newMember.name = value,
               ),
               TextFormField(
                 decoration: const InputDecoration(hintText: "PGR ID"),
                 keyboardType: TextInputType.number,
-                controller: _pgrId,
+                controller: pgrId,
                 onChanged: (value) => newMember.pgrId = int.tryParse(value)!,
               ),
               TextFormField(
                 decoration: const InputDecoration(hintText: "Discord Username"),
-                controller: _discordUsername,
+                controller: discordUsername,
                 onChanged: (value) => newMember.discordUsername = value,
               ),
               TextFormField(
                 decoration: const InputDecoration(hintText: "Discord ID"),
                 keyboardType: TextInputType.number,
-                controller: _discordId,
+                controller: discordId,
                 onChanged: (value) => newMember.discordId = value,
               ),
-              SizedBox(
+              const SizedBox(
                 height: 50,
               ),
               ElevatedButton(
                 onPressed: () {
-                  newMember.discordId = _discordId.text;
-                  newMember.name = _name.text;
-                  newMember.discordUsername = _discordUsername.text;
-                  newMember.pgrId = int.tryParse(_pgrId.text)!;
+                  newMember.discordId = discordId.text;
+                  newMember.name = name.text;
+                  newMember.discordUsername = discordUsername.text;
+                  newMember.pgrId = int.tryParse(pgrId.text)!;
                 },
-                child: Text("Verify"),
+                child: const Text("Verify"),
               )
             ],
           ),
