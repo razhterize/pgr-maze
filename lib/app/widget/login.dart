@@ -12,9 +12,8 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-
-  final TextEditingController _emailController = TextEditingController(text: "razh");
-  final TextEditingController _passwordController = TextEditingController(text: "AbsoluteJudgement");
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   late RecordAuth recordAuth;
   late Function loginCallback;
