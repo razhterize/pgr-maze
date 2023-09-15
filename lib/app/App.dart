@@ -110,7 +110,6 @@ class _AppState extends State<App> {
                       );
                     }),
                 child: const Text("Mention Members")),
-            const Spacer(),
             ElevatedButton(
               onPressed: () {
                 showDialog(
@@ -140,7 +139,11 @@ class _AppState extends State<App> {
                 );
               },
               child: const Text("New Member"),
-            )
+            ),
+            IconButton(
+                onPressed: () => setState(() {}),
+                icon: const Icon(Icons.refresh)),
+            const Spacer()
           ],
         ),
       ),
@@ -251,7 +254,6 @@ class _AppState extends State<App> {
                 onTapOutside: (event) {
                   if (pgrId.text == "" || pgrId.text.isEmpty) pgrId.text = "0";
                   newMember.pgrId = int.tryParse(pgrId.text) as int;
-
                 },
               ),
               TextFormField(
