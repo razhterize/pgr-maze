@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class Sidebar extends StatefulWidget {
   const Sidebar(
@@ -23,14 +24,14 @@ class _SidebarState extends State<Sidebar> {
   late List<dynamic> managedGuilds;
   late Function(int) callbackFunction;
 
-  final Map<String, IconData> guildIcons = {
-    "turu": Icons.bed,
-    "kuru": Icons.spoke_outlined,
-    "crepe": Icons.food_bank,
-    "tensura": Icons.animation_outlined,
-    "avarice_echo": Icons.money_sharp,
-    "arcadian": Icons.abc,
-    "ancient_weapon": Icons.abc
+  final Map<String, dynamic> guildIcons = {
+    "turu": SvgPicture.asset("assets/slavery.svg", height: 25),
+    "kuru": Image.asset("assets/kuru.gif"),
+    "crepe": SvgPicture.asset("assets/crepe.svg", height: 25),
+    "tensura": SvgPicture.asset("assets/slime.svg", height: 25),
+    "avarice_echo": SvgPicture.asset("assets/treasure-chest.svg", height: 25),
+    "arcadian": SvgPicture.asset("assets/slavery.svg", height: 25),
+    "ancient_weapon": SvgPicture.asset("assets/excalibur.svg", height: 25),
   };
 
   @override
@@ -68,17 +69,21 @@ class _SidebarState extends State<Sidebar> {
     return items;
   }
 
-  Widget sidebarItem(IconData icon, String title, int index) {
+  Widget sidebarItem(dynamic icon, String title, int index) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(2, 8, 2, 8),
-      child: MaterialButton(
-          onPressed: () {
-            callbackFunction(index);
-          },
-          child: Icon(
-            icon,
-            color: Colors.white,
-          )),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(),
+          borderRadius: BorderRadius.circular(20)
+        ),
+        child: IconButton(
+            onPressed: () {
+              callbackFunction(index);
+            },
+            icon: icon),
+      ),
     );
   }
 
