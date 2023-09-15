@@ -19,7 +19,7 @@ class _AppState extends State<App> {
   final _formKey = GlobalKey<FormState>();
 
   bool authenticated = false;
-  final PocketBase pb = PocketBase(dotenv.env["PB_LOCAL_URL"]!);
+  final PocketBase pb = PocketBase(dotenv.env["PB_URL"]!);
   late RecordAuth recordAuth;
   List<Guild> guildList = [];
 
@@ -52,13 +52,17 @@ class _AppState extends State<App> {
       darkTheme: ThemeData.dark(useMaterial3: true),
       home: Scaffold(
           body: authenticated
-              ? Builder(builder: (context) {
-                  return _mainTable(context);
-                })
-              : Login(
-                  loginCallback: _loginCallback,
-                  pb: pb,
-                )),
+              ? SafeArea(
+                child: Builder(builder: (context) {
+                    return _mainTable(context);
+                  }),
+              )
+              : SafeArea(
+                child: Login(
+                    loginCallback: _loginCallback,
+                    pb: pb,
+                  ),
+              )),
     );
   }
 
