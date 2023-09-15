@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pocketbase/pocketbase.dart';
 import 'package:scf_maze/app/models/guild.dart';
 import 'package:scf_maze/app/models/member.dart';
 import 'package:scf_maze/app/widget/table.dart';
@@ -8,20 +9,28 @@ class TableView extends StatefulWidget {
       {super.key,
       required this.guilds,
       required this.index,
-      required this.filter});
+      required this.filter,
+      required this.pb});
 
   final List<Guild> guilds;
   final int index;
   final String filter;
+  final PocketBase pb;
 
   @override
   State<TableView> createState() => _TableViewState();
 }
 
 class _TableViewState extends State<TableView> {
+  final key = GlobalKey<FormState>();
+  late List<Guild> guilds;
+
   Member activeMember = Member.defaultValue();
   String activeMap = "first";
-  late List<Guild> guilds;
+
+  final List<TextEditingController> _energyDamageControllers = [
+    for (int i = 0; i < 10; i++) TextEditingController()
+  ];
 
   @override
   void initState() {
@@ -64,7 +73,7 @@ class _TableViewState extends State<TableView> {
     List<Widget> widgets = [
       Center(
           child: Text(
-        "${activeMember.name}\n$activeMap map",
+        "Energy Damage Detail\n${activeMember.name}\n$activeMap map",
         textAlign: TextAlign.center,
       ))
     ];
@@ -78,24 +87,29 @@ class _TableViewState extends State<TableView> {
   Widget _energyDamageWidget(int day, dynamic value) {
     return ListTile(
       leading: Text("Day ${day + 1}"),
-      title: TextFormField(
+      title: TextField(
         decoration: const InputDecoration(
           hintText: "Energy Damage",
         ),
-        initialValue: "$value",
+        controller: _energyDamageControllers[day],
         onChanged: (value) {
           if (value == "") value = "0";
           setState(() {
             activeMember.mapEnergyDamage[activeMap][day] = int.tryParse(value);
           });
+          activeMember.update(widget.pb);
         },
       ),
     );
   }
 
   void _energyDamageButtonCallback(Member selectedMember, String map) {
-    activeMember = selectedMember;
-    activeMap = map;
-    setState(() {});
+    setState(() {
+      activeMember = selectedMember;
+      activeMap = map;
+    });
+    for (int i = 0; i < 10; i++) {
+      _energyDamageControllers[i].text = selectedMember.mapEnergyDamage[map][i].toString();
+    }
   }
 }
