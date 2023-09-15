@@ -253,7 +253,7 @@ class _AppState extends State<App> {
 
   String mentionSelectedUsers() {
     String mentions = "";
-    guildList[selectedGuildIndex].members.forEach((member) {
+    for (var member in guildList[selectedGuildIndex].members) {
       if (member.selected) {
         if (member.discordId != "" && member.discordId != "-") {
           mentions += "<@${member.discordId}>\n";
@@ -261,7 +261,7 @@ class _AppState extends State<App> {
           mentions += "@${member.discordUsername}\n";
         }
       }
-    });
+    }
     return mentions;
   }
 
