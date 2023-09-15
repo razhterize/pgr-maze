@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:scf_maze/app/models/guild.dart';
@@ -77,13 +78,13 @@ class _AppState extends State<App> {
                   guilds: guildList,
                   index: selectedGuildIndex,
                   filter: filter,
+                  pb: pb,
                 ),
               ),
             ],
           )
         else
           const Text("Something went wrong..."),
-
       ],
     );
   }
@@ -96,6 +97,17 @@ class _AppState extends State<App> {
         child: Row(
           children: [
             _searchBar(),
+            ElevatedButton(
+                onPressed: () => Clipboard.setData(
+                            ClipboardData(text: mentionSelectedUsers()))
+                        .then((value) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Discord Mentions copied to Clipboard"),
+                        ),
+                      );
+                    }),
+                child: const Text("Mention Members")),
             const Spacer(),
             ElevatedButton(
               onPressed: () {
@@ -237,6 +249,20 @@ class _AppState extends State<App> {
         ),
       ),
     );
+  }
+
+  String mentionSelectedUsers() {
+    String mentions = "";
+    guildList[selectedGuildIndex].members.forEach((member) {
+      if (member.selected) {
+        if (member.discordId != "" && member.discordId != "-") {
+          mentions += "<@${member.discordId}>\n";
+        } else if (member.discordUsername != "") {
+          mentions += "@${member.discordUsername}\n";
+        }
+      }
+    });
+    return mentions;
   }
 
   void _sidebarCallback(int index) {
