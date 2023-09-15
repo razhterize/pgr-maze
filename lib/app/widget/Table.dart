@@ -238,14 +238,20 @@ class _GuildTableState extends State<GuildTable> {
                             onPressed: () => Navigator.pop(context),
                             child: const Text("CANCEL")),
                         ElevatedButton(
-                            onPressed: () => member
-                                .delete(_guilds.first.pb)
-                                .then((value) => Navigator.pop(context)),
+                            onPressed: () {
+                              _guilds[widget.activeIndex]
+                                  .members
+                                  .remove(member);
+                              member.delete(_guilds[widget.activeIndex].pb);
+                              Navigator.pop(context);
+                            },
                             child: const Text("DELETE")),
                       ],
                     );
                   },
-                ).then((value) => Navigator.pop(context));
+                ).then((value) => Navigator.pop(context)).then((value) {
+                  setState(() {});
+                });
               },
               child: const Text("Delete Member"),
             ),
@@ -268,6 +274,8 @@ class _GuildTableState extends State<GuildTable> {
       setState(() {
         _guilds[widget.activeIndex].getAll();
       });
+      {}
+      ;
     });
   }
 

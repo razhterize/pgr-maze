@@ -125,18 +125,23 @@ class _AppState extends State<App> {
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
                               newMember.createInDatabase(pb);
+                              guildList[selectedGuildIndex].members.add(newMember);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                    content: Text('Processing Data')),
+                                    content: Text('Updating Members...')),
                               );
                             }
+                            Navigator.pop(context);
+                            setState(() {});
                           },
                           child: const Text("Create Member"),
                         ),
                       ],
                     );
                   },
-                );
+                ).then((value) {
+                  setState(() {});
+                });
               },
               child: const Text("New Member"),
             ),
