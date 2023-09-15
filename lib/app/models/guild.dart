@@ -27,15 +27,18 @@ class Guild {
 
   Future<void> sendToDatabase() async {
     for (var member in members) {
-      member.createInDatabase(_pb);
+      await member.existInDatabase(_pb)
+          ? member.update(_pb)
+          : member.createInDatabase(_pb);
     }
   }
 
   List<Member> getMembers() => members;
   void addMember(Member member) => members.add(member);
 
-  List<Member> filterByName(String name) =>
-      members.where((member) => member.name.contains(name)).toList();
+  List<Member> filterByName(String name) => members
+      .where((member) => member.name.toLowerCase().contains(name.toLowerCase()))
+      .toList();
 
   List<Member> filterById(int id) => members
       .where((member) => (member.pgrId as String).contains(id as String))
