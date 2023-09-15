@@ -33,6 +33,8 @@ class Guild {
     }
   }
 
+  PocketBase get pb => _pb;
+
   List<Member> getMembers() => members;
   void addMember(Member member) => members.add(member);
 
