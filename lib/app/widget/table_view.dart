@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:scf_maze/app/models/guild.dart';
 import 'package:scf_maze/app/models/member.dart';
@@ -92,6 +93,9 @@ class _TableViewState extends State<TableView> {
           hintText: "Energy Damage",
         ),
         controller: _energyDamageControllers[day],
+        inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly
+        ],
         onChanged: (value) {
           if (value == "") value = "0";
           setState(() {
