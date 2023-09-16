@@ -30,7 +30,7 @@ class _SidebarState extends State<Sidebar> {
     "crepe": SvgPicture.asset("assets/crepe.svg", height: 25),
     "tensura": SvgPicture.asset("assets/slime.svg", height: 25),
     "avarice_echo": SvgPicture.asset("assets/treasure-chest.svg", height: 25),
-    "arcadian": SvgPicture.asset("assets/slavery.svg", height: 25),
+    "arcadian": SvgPicture.asset("assets/clown.svg", height: 25),
     "ancient_weapon": SvgPicture.asset("assets/excalibur.svg", height: 25),
   };
 
