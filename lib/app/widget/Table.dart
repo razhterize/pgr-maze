@@ -23,9 +23,17 @@ class GuildTable extends StatefulWidget {
 
 class _GuildTableState extends State<GuildTable> {
   final _formKey = GlobalKey<FormState>();
+  final List<TextEditingController> _editMemberControllers = [
+    TextEditingController(),
+    TextEditingController(),
+    TextEditingController(),
+    TextEditingController(),
+  ];
   late List<Guild> _guilds;
 
   bool selectAll = false;
+
+  int lastSortIndex = 0;
 
   List<String> headers = [
     "Action",
@@ -79,7 +87,9 @@ class _GuildTableState extends State<GuildTable> {
                 (context, column) => Material(
                   type: MaterialType.transparency,
                   child: InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      _sortMembers(column);
+                    },
                     child: Padding(
                       padding: const EdgeInsets.all(4),
                       child: Align(
@@ -229,25 +239,7 @@ class _GuildTableState extends State<GuildTable> {
                 showDialog(
                   context: context,
                   builder: (context) {
-                    return AlertDialog(
-                      title: const Text("Delete Member"),
-                      content: Text(
-                          "Are you sure to delete ${member.name} from ${member.collectionName.replaceAll('_', ' ')}"),
-                      actions: [
-                        ElevatedButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text("CANCEL")),
-                        ElevatedButton(
-                            onPressed: () {
-                              _guilds[widget.activeIndex]
-                                  .members
-                                  .remove(member);
-                              member.delete(_guilds[widget.activeIndex].pb);
-                              Navigator.pop(context);
-                            },
-                            child: const Text("DELETE")),
-                      ],
-                    );
+                    return _deleteMemberDialog(member, context);
                   },
                 ).then((value) => Navigator.pop(context)).then((value) {
                   setState(() {});
@@ -258,11 +250,20 @@ class _GuildTableState extends State<GuildTable> {
             ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
+                  member.name = _editMemberControllers[0].text;
+                  member.pgrId =
+                      int.tryParse(_editMemberControllers[1].text) as int;
+                  member.discordUsername = _editMemberControllers[2].text;
+                  member.discordId = _editMemberControllers[3].text;
                   member.update(_guilds.first.pb);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Saving...')),
+                    const SnackBar(
+                      content: Text('Saving...'),
+                      duration: Duration(seconds: 2),
+                    ),
                   );
                   Navigator.pop(context);
+                  setState(() {});
                 }
               },
               child: const Text("Save"),
@@ -270,21 +271,34 @@ class _GuildTableState extends State<GuildTable> {
           ],
         );
       },
-    ).then((value) {
-      setState(() {
-        _guilds[widget.activeIndex].getAll();
-      });
-    });
+    );
+  }
+
+  AlertDialog _deleteMemberDialog(Member member, BuildContext context) {
+    return AlertDialog(
+      title: const Text("Delete Member"),
+      content: Text(
+          "Are you sure to delete ${member.name} from ${member.collectionName.replaceAll('_', ' ')}"),
+      actions: [
+        ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("CANCEL")),
+        ElevatedButton(
+            onPressed: () {
+              _guilds[widget.activeIndex].members.remove(member);
+              member.delete(_guilds[widget.activeIndex].pb);
+              Navigator.pop(context);
+            },
+            child: const Text("DELETE")),
+      ],
+    );
   }
 
   Widget _editMemberContent(BuildContext context, Member member) {
-    TextEditingController name = TextEditingController(text: member.name);
-    TextEditingController pgrId =
-        TextEditingController(text: "${member.pgrId}");
-    TextEditingController discordId =
-        TextEditingController(text: member.discordId);
-    TextEditingController discordUsername =
-        TextEditingController(text: member.discordUsername);
+    _editMemberControllers[0].text = member.name;
+    _editMemberControllers[1].text = "${member.pgrId}";
+    _editMemberControllers[2].text = member.discordUsername;
+    _editMemberControllers[3].text = member.discordId;
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SizedBox(
@@ -296,56 +310,68 @@ class _GuildTableState extends State<GuildTable> {
             children: [
               TextFormField(
                 decoration: const InputDecoration(label: Text("Name")),
-                controller: name,
+                controller: _editMemberControllers[0],
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Name cannot be empty';
                   }
                   return null;
                 },
-                onChanged: (value) => member.name = value,
-                onTapOutside: (event) => member.name = name.text,
               ),
               TextFormField(
                 decoration: const InputDecoration(label: Text("PGR ID")),
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                controller: pgrId,
+                controller: _editMemberControllers[1],
                 validator: (value) {
                   if (value == null || value.isEmpty || value == "0") {
                     return 'PGR ID cannot be empty or 0';
                   }
+                  if (value.length != 8) {
+                    return "PGR ID must be 8 digits long";
+                  }
                   return null;
-                },
-                onChanged: (value) {
-                  if (value == "" || value.isEmpty) value = "0";
-                  member.pgrId = int.tryParse(value) as int;
-                },
-                onTapOutside: (event) {
-                  if (pgrId.text == "" || pgrId.text.isEmpty) pgrId.text = "0";
-                  member.pgrId = int.tryParse(pgrId.text) as int;
                 },
               ),
               TextFormField(
                 decoration:
                     const InputDecoration(label: Text("Discord Username")),
-                controller: discordUsername,
-                onChanged: (value) => member.discordUsername = value,
-                onTapOutside: (event) =>
-                    member.discordUsername = discordUsername.text,
+                controller: _editMemberControllers[2],
               ),
               TextFormField(
-                decoration: const InputDecoration(label: Text("Discord ID")),
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                controller: discordId,
-                onChanged: (value) => member.discordId = value,
-                onTapOutside: (event) => member.discordId = discordId.text,
-              ),
+                  decoration: const InputDecoration(label: Text("Discord ID")),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  controller: _editMemberControllers[3]),
             ],
           ),
         ),
       ),
     );
+  }
+
+  void _sortMembers(int columnIndex) {
+    debugPrint("Current Index: $columnIndex, Last Index: $lastSortIndex");
+    if (lastSortIndex != columnIndex) {
+      switch (columnIndex) {
+        case 2:
+          _guilds[widget.activeIndex].members.sort(
+              (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+          break;
+        case 3:
+          _guilds[widget.activeIndex]
+              .members
+              .sort((a, b) => a.pgrId.compareTo(b.pgrId));
+          break;
+        case 8:
+          _guilds[widget.activeIndex].members.sort(
+              (a, b) => a.totalEnergyDamage.compareTo(b.totalEnergyDamage));
+          break;
+      }
+    } else {
+      _guilds[widget.activeIndex].members.reversed.toList();
+    }
+    setState(() {});
+    lastSortIndex = columnIndex;
   }
 }
