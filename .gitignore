@@ -48,3 +48,6 @@ web/*
 
 # Windows
 windows/*
+
+# Android stuff
+android/*
