@@ -207,7 +207,7 @@ class _GuildTableState extends State<GuildTable> {
       );
     } else if (columnIndex == 8) {
       return Text(
-        "${member.totalEnergyDamage}",
+        "${member.energyDamagePerMap("first") + member.energyDamagePerMap("second") + member.energyDamagePerMap("third")}",
         textAlign: TextAlign.center,
       );
     } else {
