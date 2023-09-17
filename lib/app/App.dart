@@ -171,7 +171,7 @@ class _AppState extends State<App> {
             hintText: "Search $searchMode",
             onChanged: (value) {
               setState(() {
-                filter = value;
+                filter = "$searchMode;$value";
               });
             },
           ),
@@ -253,6 +253,8 @@ class _AppState extends State<App> {
                 validator: (value) {
                   if (value == null || value.isEmpty || value == "0") {
                     return 'PGR ID cannot be empty or 0';
+                  } else if (value.length != 8){
+                    return "PGR ID must be 8 digits long";
                   }
                   return null;
                 },
