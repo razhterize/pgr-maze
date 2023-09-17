@@ -43,17 +43,19 @@ class _SidebarState extends State<Sidebar> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.lightBlueAccent),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: SizedBox(
-          width: 50,
-          child: Column(
-            children: _guildSwitcher(),
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.lightBlueAccent),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: SizedBox(
+            width: 50,
+            child: Column(
+              children: _guildSwitcher(),
+            ),
           ),
         ),
       ),

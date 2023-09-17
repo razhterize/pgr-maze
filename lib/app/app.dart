@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pocketbase/pocketbase.dart';
@@ -73,46 +75,66 @@ class _AppState extends State<App> {
     return AppBar(
       toolbarHeight: 36,
       title: Text(guildAbv[guildList[selectedGuildIndex].name]!),
-      centerTitle: true,
+      centerTitle: !Platform.isAndroid,
       actions: [
         Padding(
           padding: const EdgeInsets.all(3.0),
           child: searchBar(),
         ),
         Padding(
-          padding: const EdgeInsets.all(3.0),
-          child: ElevatedButton.icon(
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text: mentionSelectedUsers()));
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                  content:
-                      Text("Users mention text has been copied to clipboard")));
-            },
-            icon: const Icon(Icons.alternate_email_outlined),
-            label: const Text("Mention"),
-          ),
-        ),
+            padding: const EdgeInsets.all(3.0),
+            child: (!Platform.isAndroid)
+                ? ElevatedButton.icon(
+                    onPressed: () {
+                      Clipboard.setData(
+                          ClipboardData(text: mentionSelectedUsers()));
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text(
+                              "Users mention text has been copied to clipboard")));
+                    },
+                    icon: const Icon(Icons.alternate_email_outlined),
+                    label: const Text("Mention"),
+                  )
+                : IconButton(
+                    onPressed: () {
+                      Clipboard.setData(
+                          ClipboardData(text: mentionSelectedUsers()));
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text(
+                              "Users mention text has been copied to clipboard")));
+                    },
+                    icon: Icon(Icons.alternate_email))),
         Padding(
-          padding: const EdgeInsets.all(3.0),
-          child: ElevatedButton.icon(
-            label: const Text("Member"),
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              showDialog(
-                  context: context,
-                  builder: (context) => newMemberDialog(context));
-            },
-          ),
-        ),
+            padding: const EdgeInsets.all(3.0),
+            child: (!Platform.isAndroid)
+                ? ElevatedButton.icon(
+                    label: const Text("Member"),
+                    icon: const Icon(Icons.add),
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) => newMemberDialog(context));
+                    },
+                  )
+                : IconButton(
+                    onPressed: () => showDialog(
+                        context: context,
+                        builder: (context) => newMemberDialog(context)),
+                    icon: Icon(Icons.add))),
         Padding(
-          padding: const EdgeInsets.all(3.0),
-          child: ElevatedButton.icon(
-              onPressed: () {
-                setState(() {});
-              },
-              label: const Text("Refresh"),
-              icon: const Icon(Icons.refresh)),
-        )
+            padding: const EdgeInsets.all(3.0),
+            child: (!Platform.isAndroid)
+                ? ElevatedButton.icon(
+                    onPressed: () {
+                      setState(() {});
+                    },
+                    label: const Text("Refresh"),
+                    icon: const Icon(Icons.refresh))
+                : IconButton(
+                    onPressed: () {
+                      setState(() {});
+                    },
+                    icon: Icon(Icons.refresh)))
       ],
     );
   }
@@ -142,7 +164,7 @@ class _AppState extends State<App> {
     return SearchAnchor(
       builder: (context, controller) {
         return SizedBox(
-          width: maxWidth / 7,
+          width: maxWidth * 0.2,
           height: 32,
           child: SearchBar(
             leading: searchModeDropdown(),

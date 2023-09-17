@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:material_table_view/material_table_view.dart';
@@ -36,7 +38,7 @@ class _GuildTableState extends State<GuildTable> {
   int lastSortIndex = 0;
 
   List<String> headers = [
-    "Action",
+    "Edit",
     "Name",
     "PGR ID",
     "Discord Username",
@@ -68,17 +70,17 @@ class _GuildTableState extends State<GuildTable> {
             width: maxWidth,
             child: TableView.builder(
               rowCount: _rowCountOnSort(),
-              rowHeight: 32,
+              rowHeight: Platform.isAndroid ? 40 : 32,
               columns: [
-                TableColumn(width: maxWidth / 20),
-                TableColumn(width: maxWidth / 20),
-                TableColumn(width: maxWidth / 10),
-                TableColumn(width: maxWidth / 10),
-                TableColumn(width: maxWidth / 8),
-                TableColumn(width: maxWidth / 13),
-                TableColumn(width: maxWidth / 13),
-                TableColumn(width: maxWidth / 13),
-                TableColumn(width: maxWidth / 10),
+                TableColumn(width: maxWidth * 0.05),
+                TableColumn(width: maxWidth * 0.1),
+                TableColumn(width: maxWidth * 0.2),
+                TableColumn(width: maxWidth * 0.15),
+                TableColumn(width: maxWidth * 0.25),
+                TableColumn(width: maxWidth * 0.11),
+                TableColumn(width: maxWidth * 0.11),
+                TableColumn(width: maxWidth * 0.11),
+                TableColumn(width: maxWidth *0.13),
               ],
               headerBuilder: (context, contentBuilder) => contentBuilder(
                 context,
@@ -97,8 +99,7 @@ class _GuildTableState extends State<GuildTable> {
                                 value: selectAll,
                                 onChanged: (value) {
                                   for (var member
-                                      in _guilds[widget.activeIndex]
-                                          .members) {
+                                      in _guilds[widget.activeIndex].members) {
                                     member.selected = value!;
                                   }
                                   setState(() {
@@ -127,8 +128,9 @@ class _GuildTableState extends State<GuildTable> {
                             child: _columnContent(
                                 row,
                                 column,
-                                _guilds[widget.activeIndex].filterByName(
-                                    widget.filter.replaceAll("name;", ""))[row]),
+                                _guilds[widget.activeIndex].filterByName(widget
+                                    .filter
+                                    .replaceAll("name;", ""))[row]),
                           );
                         } else if (widget.filter.startsWith("id;")) {
                           return Center(
@@ -174,7 +176,9 @@ class _GuildTableState extends State<GuildTable> {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ascending ? const Icon(Icons.arrow_downward) : const Icon(Icons.arrow_upward),
+          ascending
+              ? const Icon(Icons.arrow_downward)
+              : const Icon(Icons.arrow_upward),
           Text(headers[column - 1])
         ],
       );

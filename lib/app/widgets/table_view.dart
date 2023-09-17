@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pocketbase/pocketbase.dart';
@@ -42,34 +44,66 @@ class _TableViewState extends State<TableView> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: MediaQuery.of(context).size.width - 68,
-      child: Row(
-        children: [
-          GuildTable(
-            guilds: guilds,
-            activeIndex: widget.index,
-            filter: widget.filter,
-            callbackFunction: _energyDamageButtonCallback,
-          ),
-          Expanded(
-            flex: 1,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 8, 6, 8),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.lightBlueAccent),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: ListView(children: _energyDamageDetail()),
-              ),
-            ),
-          ),
-        ],
-      ),
+      width: MediaQuery.of(context).size.width,
+      child: (Platform.isAndroid || Platform.isIOS)
+          ? mobileLayout()
+          : desktopLayout(),
     );
   }
 
-  List<Widget> _energyDamageDetail() {
+  Row desktopLayout() {
+    return Row(
+      children: [
+        GuildTable(
+          guilds: guilds,
+          activeIndex: widget.index,
+          filter: widget.filter,
+          callbackFunction: energyDamageButtonCallback,
+        ),
+        Expanded(
+          flex: 1,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(0, 8, 6, 8),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.lightBlueAccent),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: ListView(children: energyDamageDetail()),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Column mobileLayout() {
+    return Column(
+      children: [
+        GuildTable(
+          guilds: guilds,
+          activeIndex: widget.index,
+          filter: widget.filter,
+          callbackFunction: energyDamageButtonCallback,
+        ),
+        Expanded(
+          flex: 2,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(2, 8, 6, 8),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.lightBlueAccent),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: ListView(children: energyDamageDetail()),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<Widget> energyDamageDetail() {
     List<Widget> widgets = [
       Center(
           child: Text(
@@ -79,12 +113,12 @@ class _TableViewState extends State<TableView> {
     ];
     for (int i = 0; i < activeMember.mapEnergyDamage[activeMap].length; i++) {
       widgets.add(
-          _energyDamageWidget(i, activeMember.mapEnergyDamage[activeMap][i]));
+          energyDamageWidget(i, activeMember.mapEnergyDamage[activeMap][i]));
     }
     return widgets;
   }
 
-  Widget _energyDamageWidget(int day, dynamic value) {
+  Widget energyDamageWidget(int day, dynamic value) {
     return ListTile(
       leading: Text("Day ${day + 1}"),
       title: TextField(
@@ -92,9 +126,7 @@ class _TableViewState extends State<TableView> {
           hintText: "Energy Damage",
         ),
         controller: _energyDamageControllers[day],
-        inputFormatters: [
-          FilteringTextInputFormatter.digitsOnly
-        ],
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         onChanged: (value) {
           if (value == "") value = "0";
           setState(() {
@@ -106,13 +138,14 @@ class _TableViewState extends State<TableView> {
     );
   }
 
-  void _energyDamageButtonCallback(Member selectedMember, String map) {
+  void energyDamageButtonCallback(Member selectedMember, String map) {
     setState(() {
       activeMember = selectedMember;
       activeMap = map;
     });
     for (int i = 0; i < 10; i++) {
-      _energyDamageControllers[i].text = selectedMember.mapEnergyDamage[map][i].toString();
+      _energyDamageControllers[i].text =
+          selectedMember.mapEnergyDamage[map][i].toString();
     }
   }
 }
