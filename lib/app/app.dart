@@ -8,20 +8,26 @@ import 'package:scf_maze/app/widgets/login.dart';
 import 'package:scf_maze/app/widgets/table_view.dart';
 import 'package:scf_maze/app/widgets/sidebar.dart';
 
-class WindowsApp extends StatefulWidget {
-  const WindowsApp({super.key});
+class App extends StatefulWidget {
+  const App({super.key});
 
   @override
-  State<WindowsApp> createState() => _WindowsAppState();
+  State<App> createState() => _AppState();
 }
 
-class _WindowsAppState extends State<WindowsApp> {
+class _AppState extends State<App> {
   final _formKey = GlobalKey<FormState>();
 
   bool authenticated = false;
   final PocketBase pb = PocketBase(dotenv.env["PB_URL"]!);
   late RecordAuth recordAuth;
   List<Guild> guildList = [];
+  List<TextEditingController> newMemberControllers = [
+    TextEditingController(),
+    TextEditingController(),
+    TextEditingController(),
+    TextEditingController()
+  ];
 
   int selectedGuildIndex = 0;
   Map<String, String> guildAbv = {
@@ -45,49 +51,85 @@ class _WindowsAppState extends State<WindowsApp> {
 
   @override
   Widget build(BuildContext context) {
-    // _openLogin(context);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
-      darkTheme: ThemeData.dark(useMaterial3: true),
-      home: Scaffold(
-          body: authenticated
-              ? SafeArea(
-                child: Builder(builder: (context) {
-                    return _mainTable(context);
-                  }),
-              )
-              : SafeArea(
-                child: Login(
-                    loginCallback: _loginCallback,
-                    pb: pb,
-                  ),
-              )),
+      darkTheme: ThemeData.dark(),
+      home: Builder(builder: (context) {
+        return Scaffold(
+            appBar: authenticated ? appBar(context) : null,
+            drawer: Sidebar(
+                managedGuilds: managedGuilds,
+                callbackFunction: _sidebarCallback),
+            body: authenticated
+                ? SafeArea(child: mainTable(context))
+                : SafeArea(
+                    child: Login(loginCallback: _loginCallback, pb: pb)));
+      }),
     );
   }
 
-  Widget _mainTable(BuildContext context) {
+  PreferredSizeWidget appBar(BuildContext context) {
+    return AppBar(
+      toolbarHeight: 36,
+      title: Text(guildAbv[guildList[selectedGuildIndex].name]!),
+      centerTitle: true,
+      actions: [
+        Padding(
+          padding: const EdgeInsets.all(3.0),
+          child: searchBar(),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(3.0),
+          child: ElevatedButton.icon(
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: mentionSelectedUsers()));
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content:
+                      Text("Users mention text has been copied to clipboard")));
+            },
+            icon: const Icon(Icons.alternate_email_outlined),
+            label: const Text("Mention"),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(3.0),
+          child: ElevatedButton.icon(
+            label: const Text("Member"),
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (context) => newMemberDialog(context));
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(3.0),
+          child: ElevatedButton.icon(
+              onPressed: () {
+                setState(() {});
+              },
+              label: const Text("Refresh"),
+              icon: const Icon(Icons.refresh)),
+        )
+      ],
+    );
+  }
+
+  Widget mainTable(BuildContext context) {
     return Flex(
       direction: Axis.horizontal,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Sidebar(
-          managedGuilds: managedGuilds,
-          callbackFunction: _sidebarCallback,
-        ),
         if (authenticated && managedGuilds.isNotEmpty)
-          Column(
-            children: [
-              menuBar(context),
-              Expanded(
-                child: TableView(
-                  guilds: guildList,
-                  index: selectedGuildIndex,
-                  filter: filter,
-                  pb: pb,
-                ),
-              ),
-            ],
+          Expanded(
+            child: TableView(
+              guilds: guildList,
+              index: selectedGuildIndex,
+              filter: filter,
+              pb: pb,
+            ),
           )
         else
           const Text("Something went wrong..."),
@@ -95,78 +137,15 @@ class _WindowsAppState extends State<WindowsApp> {
     );
   }
 
-  SizedBox menuBar(BuildContext context) {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width - 80,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 2, 8, 0),
-        child: Row(
-          children: [
-            _searchBar(),
-            ElevatedButton(
-                onPressed: () => Clipboard.setData(
-                            ClipboardData(text: mentionSelectedUsers()))
-                        .then((value) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Discord Mentions copied to Clipboard"),
-                        ),
-                      );
-                    }),
-                child: const Text("Mention Members")),
-            ElevatedButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    Member newMember = Member.defaultValue();
-                    return AlertDialog(
-                      title: const Text("Add Member"),
-                      // scrollable: true,
-                      content: _newMemberWidget(context, newMember),
-                      actions: [
-                        ElevatedButton(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              newMember.createInDatabase(pb);
-                              guildList[selectedGuildIndex].members.add(newMember);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text('Updating Members...')),
-                              );
-                            }
-                            Navigator.pop(context);
-                            setState(() {});
-                          },
-                          child: const Text("Create Member"),
-                        ),
-                      ],
-                    );
-                  },
-                ).then((value) {
-                  setState(() {});
-                });
-              },
-              child: const Text("New Member"),
-            ),
-            IconButton(
-                onPressed: () => setState(() {}),
-                icon: const Icon(Icons.refresh)),
-            const Spacer()
-          ],
-        ),
-      ),
-    );
-  }
-
-  SearchAnchor _searchBar() {
+  SearchAnchor searchBar() {
+    double maxWidth = MediaQuery.of(context).size.width;
     return SearchAnchor(
       builder: (context, controller) {
         return SizedBox(
-          width: 300,
+          width: maxWidth / 7,
           height: 32,
           child: SearchBar(
-            leading: _searchModeDropdown(),
+            leading: searchModeDropdown(),
             controller: controller,
             hintText: "Search $searchMode",
             onChanged: (value) {
@@ -184,7 +163,7 @@ class _WindowsAppState extends State<WindowsApp> {
     );
   }
 
-  Widget _searchModeDropdown() {
+  Widget searchModeDropdown() {
     return DropdownButtonHideUnderline(
       child: DropdownButton(
         borderRadius: BorderRadius.circular(10),
@@ -195,24 +174,45 @@ class _WindowsAppState extends State<WindowsApp> {
           });
         },
         items: const [
-          DropdownMenuItem(
-            value: "name",
-            child: Text("Name"),
-          ),
-          DropdownMenuItem(
-            value: "id",
-            child: Text("ID"),
-          )
+          DropdownMenuItem(value: "name", child: Text("Name")),
+          DropdownMenuItem(value: "id", child: Text("ID"))
         ],
       ),
     );
   }
 
-  Widget _newMemberWidget(BuildContext context, Member newMember) {
-    TextEditingController name = TextEditingController();
-    TextEditingController pgrId = TextEditingController();
-    TextEditingController discordId = TextEditingController();
-    TextEditingController discordUsername = TextEditingController();
+  Widget newMemberDialog(BuildContext context) {
+    Member newMember = Member.defaultValue();
+    for (var element in newMemberControllers) {
+      element.clear();
+    }
+
+    return AlertDialog(
+      title: const Text("Add Member"),
+      content: newMemberContent(context, newMember),
+      actions: [
+        ElevatedButton(
+            onPressed: () {
+              if (_formKey.currentState!.validate()) {
+                newMember.name = newMemberControllers[0].text;
+                newMember.pgrId = int.tryParse(newMemberControllers[1].text)!;
+                newMember.discordUsername = newMemberControllers[2].text;
+                newMember.discordId = newMemberControllers[3].text;
+                newMember.createInDatabase(pb);
+                guildList[selectedGuildIndex].members.add(newMember);
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Updating Members...')));
+                Navigator.pop(context);
+              } else {
+                return;
+              }
+            },
+            child: const Text("Create Member")),
+      ],
+    );
+  }
+
+  Widget newMemberContent(BuildContext context, Member newMember) {
     newMember.collectionName = "turu";
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -235,52 +235,37 @@ class _WindowsAppState extends State<WindowsApp> {
               ),
               TextFormField(
                 decoration: const InputDecoration(hintText: "Name"),
-                controller: name,
+                controller: newMemberControllers[0],
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Name cannot be empty';
                   }
                   return null;
                 },
-                onChanged: (value) => newMember.name = value,
-                onTapOutside: (event) => newMember.name = name.text,
               ),
               TextFormField(
                 decoration: const InputDecoration(hintText: "PGR ID"),
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                controller: pgrId,
+                controller: newMemberControllers[1],
                 validator: (value) {
                   if (value == null || value.isEmpty || value == "0") {
                     return 'PGR ID cannot be empty or 0';
-                  } else if (value.length != 8){
+                  } else if (value.length != 8) {
                     return "PGR ID must be 8 digits long";
                   }
                   return null;
                 },
-                onChanged: (value) {
-                  if (value == "" || value.isEmpty) value = "0";
-                  newMember.pgrId = int.tryParse(value) as int;
-                },
-                onTapOutside: (event) {
-                  if (pgrId.text == "" || pgrId.text.isEmpty) pgrId.text = "0";
-                  newMember.pgrId = int.tryParse(pgrId.text) as int;
-                },
               ),
               TextFormField(
                 decoration: const InputDecoration(hintText: "Discord Username"),
-                controller: discordUsername,
-                onChanged: (value) => newMember.discordUsername = value,
-                onTapOutside: (event) =>
-                    newMember.discordUsername = discordUsername.text,
+                controller: newMemberControllers[2],
               ),
               TextFormField(
                 decoration: const InputDecoration(hintText: "Discord ID"),
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                controller: discordId,
-                onChanged: (value) => newMember.discordId = value,
-                onTapOutside: (event) => newMember.discordId = discordId.text,
+                controller: newMemberControllers[3],
               ),
             ],
           ),

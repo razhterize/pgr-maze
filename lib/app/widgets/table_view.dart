@@ -41,7 +41,6 @@ class _TableViewState extends State<TableView> {
 
   @override
   Widget build(BuildContext context) {
-    // debugPrint("${MediaQuery.of(context).size.height}x${MediaQuery.of(context).size.width}");
     return SizedBox(
       width: MediaQuery.of(context).size.width - 68,
       child: Row(

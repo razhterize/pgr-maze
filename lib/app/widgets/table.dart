@@ -86,7 +86,7 @@ class _GuildTableState extends State<GuildTable> {
                   type: MaterialType.transparency,
                   child: InkWell(
                     onTap: () {
-                      _sortMembers(column);
+                      sortMembers(column);
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(4),
@@ -97,7 +97,8 @@ class _GuildTableState extends State<GuildTable> {
                                 value: selectAll,
                                 onChanged: (value) {
                                   for (var member
-                                      in _guilds[widget.activeIndex].members) {
+                                      in _guilds[widget.activeIndex]
+                                          .members) {
                                     member.selected = value!;
                                   }
                                   setState(() {
@@ -112,27 +113,39 @@ class _GuildTableState extends State<GuildTable> {
                 ),
               ),
               rowBuilder: (context, row, contentBuilder) {
-                return InkWell(
-                  child: contentBuilder(
-                    context,
-                    (context, column) {
-                      if (widget.filter.startsWith("name;")) {
-                        return _columnContent(
-                            row,
-                            column,
-                            _guilds[widget.activeIndex].filterByName(
-                                widget.filter.replaceAll("name;", ""))[row]);
-                      } else if (widget.filter.startsWith("id;")) {
-                        return _columnContent(
-                            row,
-                            column,
-                            _guilds[widget.activeIndex].filterById(
-                                widget.filter.replaceAll("id;", ""))[row]);
-                      } else {
-                        return _columnContent(row, column,
-                            _guilds[widget.activeIndex].members[row]);
-                      }
-                    },
+                return Container(
+                  // color: row.isOdd ? Colors.white24 : Colors.white10,
+                  decoration: const BoxDecoration(
+                      border: BorderDirectional(
+                          bottom: BorderSide(color: Colors.white))),
+                  child: InkWell(
+                    child: contentBuilder(
+                      context,
+                      (context, column) {
+                        if (widget.filter.startsWith("name;")) {
+                          return Center(
+                            child: _columnContent(
+                                row,
+                                column,
+                                _guilds[widget.activeIndex].filterByName(
+                                    widget.filter.replaceAll("name;", ""))[row]),
+                          );
+                        } else if (widget.filter.startsWith("id;")) {
+                          return Center(
+                            child: _columnContent(
+                                row,
+                                column,
+                                _guilds[widget.activeIndex].filterById(
+                                    widget.filter.replaceAll("id;", ""))[row]),
+                          );
+                        } else {
+                          return Center(
+                            child: _columnContent(row, column,
+                                _guilds[widget.activeIndex].members[row]),
+                          );
+                        }
+                      },
+                    ),
                   ),
                 );
               },
@@ -159,8 +172,9 @@ class _GuildTableState extends State<GuildTable> {
   Widget _headerContent(int column) {
     if (column == lastSortIndex && [2, 3, 8].contains(column)) {
       return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ascending ? Icon(Icons.arrow_downward) : Icon(Icons.arrow_upward),
+          ascending ? const Icon(Icons.arrow_downward) : const Icon(Icons.arrow_upward),
           Text(headers[column - 1])
         ],
       );
@@ -181,23 +195,20 @@ class _GuildTableState extends State<GuildTable> {
     } else if (columnIndex == 2) {
       return Text(
         member.name,
-        textAlign: TextAlign.center,
       );
     } else if (columnIndex == 3) {
       return Text(
         "${member.pgrId}",
-        textAlign: TextAlign.center,
       );
     } else if (columnIndex == 4) {
       return Text(
         member.discordUsername,
-        textAlign: TextAlign.center,
       );
     } else if (columnIndex == 5) {
       return Padding(
         padding: const EdgeInsets.all(2.0),
         child: Container(
-          color: Colors.lightBlue,
+          color: Colors.white12,
           child: MaterialButton(
             onPressed: () {
               widget.callbackFunction(member, "first");
@@ -213,14 +224,13 @@ class _GuildTableState extends State<GuildTable> {
       return Padding(
         padding: const EdgeInsets.all(2.0),
         child: Container(
-          color: Colors.lightBlue,
+          color: Colors.white24,
           child: MaterialButton(
             onPressed: () {
               widget.callbackFunction(member, "second");
             },
             child: Text(
               "${member.energyDamagePerMap("second")}",
-              textAlign: TextAlign.center,
             ),
           ),
         ),
@@ -229,14 +239,13 @@ class _GuildTableState extends State<GuildTable> {
       return Padding(
         padding: const EdgeInsets.all(2.0),
         child: Container(
-          color: Colors.lightBlue,
+          color: Colors.white30,
           child: MaterialButton(
             onPressed: () {
               widget.callbackFunction(member, "third");
             },
             child: Text(
               "${member.energyDamagePerMap("third")}",
-              textAlign: TextAlign.center,
             ),
           ),
         ),
@@ -244,12 +253,11 @@ class _GuildTableState extends State<GuildTable> {
     } else if (columnIndex == 8) {
       return Text(
         "${member.energyDamagePerMap("first") + member.energyDamagePerMap("second") + member.energyDamagePerMap("third")}",
-        textAlign: TextAlign.center,
       );
     } else {
       return IconButton(
           onPressed: () => _openEditMember(context, member),
-          icon: const Center(child: Icon(Icons.edit_square)));
+          icon: const Icon(Icons.edit_square));
     }
   }
 
@@ -258,14 +266,14 @@ class _GuildTableState extends State<GuildTable> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          content: _editMemberContent(context, member),
+          content: editMemberContent(context, member),
           actions: [
             ElevatedButton(
               onPressed: () {
                 showDialog(
                   context: context,
                   builder: (context) {
-                    return _deleteMemberDialog(member, context);
+                    return deleteMemberDialog(member, context);
                   },
                 ).then((value) => Navigator.pop(context)).then((value) {
                   setState(() {});
@@ -300,7 +308,7 @@ class _GuildTableState extends State<GuildTable> {
     );
   }
 
-  AlertDialog _deleteMemberDialog(Member member, BuildContext context) {
+  AlertDialog deleteMemberDialog(Member member, BuildContext context) {
     return AlertDialog(
       title: const Text("Delete Member"),
       content: Text(
@@ -320,7 +328,7 @@ class _GuildTableState extends State<GuildTable> {
     );
   }
 
-  Widget _editMemberContent(BuildContext context, Member member) {
+  Widget editMemberContent(BuildContext context, Member member) {
     _editMemberControllers[0].text = member.name;
     _editMemberControllers[1].text = "${member.pgrId}";
     _editMemberControllers[2].text = member.discordUsername;
@@ -376,7 +384,7 @@ class _GuildTableState extends State<GuildTable> {
     );
   }
 
-  void _sortMembers(int columnIndex) {
+  void sortMembers(int columnIndex) {
     if ((lastSortIndex != columnIndex && !ascending) ||
         (lastSortIndex == columnIndex && !ascending) ||
         (lastSortIndex != columnIndex)) {

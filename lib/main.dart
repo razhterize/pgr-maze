@@ -14,5 +14,5 @@ Future<void> main(List<String> args) async {
       await windowManager.setTitle('SCF Guild Maze Management');
     });
   }
-  runApp(const WindowsApp());
+  runApp(const App());
 }
