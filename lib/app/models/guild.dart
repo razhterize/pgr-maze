@@ -42,7 +42,7 @@ class Guild {
       .where((member) => member.name.toLowerCase().contains(name.toLowerCase()))
       .toList();
 
-  List<Member> filterById(int id) => members
-      .where((member) => (member.pgrId as String).contains(id as String))
+  List<Member> filterById(String id) => members
+      .where((member) => ("${member.pgrId}").contains(id))
       .toList();
 }

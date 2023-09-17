@@ -32,7 +32,7 @@ class _GuildTableState extends State<GuildTable> {
   late List<Guild> _guilds;
 
   bool selectAll = false;
-
+  bool ascending = false;
   int lastSortIndex = 0;
 
   List<String> headers = [
@@ -67,9 +67,7 @@ class _GuildTableState extends State<GuildTable> {
           child: SizedBox(
             width: maxWidth,
             child: TableView.builder(
-              rowCount: _guilds[widget.activeIndex]
-                  .filterByName(widget.filter)
-                  .length,
+              rowCount: _rowCountOnSort(),
               rowHeight: 32,
               columns: [
                 TableColumn(width: maxWidth / 20),
@@ -107,7 +105,7 @@ class _GuildTableState extends State<GuildTable> {
                                   });
                                 },
                               )
-                            : Text(headers[column - 1]),
+                            : _headerContent(column),
                       ),
                     ),
                   ),
@@ -118,18 +116,21 @@ class _GuildTableState extends State<GuildTable> {
                   child: contentBuilder(
                     context,
                     (context, column) {
-                      if (widget.filter == "") {
-                        return _columnContent(
-                          row,
-                          column,
-                          _guilds[widget.activeIndex].members[row],
-                        );
-                      } else {
+                      if (widget.filter.startsWith("name;")) {
                         return _columnContent(
                             row,
                             column,
-                            _guilds[widget.activeIndex]
-                                .filterByName(widget.filter)[row]);
+                            _guilds[widget.activeIndex].filterByName(
+                                widget.filter.replaceAll("name;", ""))[row]);
+                      } else if (widget.filter.startsWith("id;")) {
+                        return _columnContent(
+                            row,
+                            column,
+                            _guilds[widget.activeIndex].filterById(
+                                widget.filter.replaceAll("id;", ""))[row]);
+                      } else {
+                        return _columnContent(row, column,
+                            _guilds[widget.activeIndex].members[row]);
                       }
                     },
                   ),
@@ -140,6 +141,31 @@ class _GuildTableState extends State<GuildTable> {
         ),
       ),
     );
+  }
+
+  int _rowCountOnSort() {
+    debugPrint(widget.filter);
+    if (widget.filter.startsWith("name;")) {
+      return _guilds[widget.activeIndex]
+          .filterByName(widget.filter.replaceAll("name;", ""))
+          .length;
+    } else {
+      return _guilds[widget.activeIndex]
+          .filterById(widget.filter.replaceAll("id;", ""))
+          .length;
+    }
+  }
+
+  Widget _headerContent(int column) {
+    if (column == lastSortIndex && [2, 3, 8].contains(column)) {
+      return Row(
+        children: [
+          ascending ? Icon(Icons.arrow_downward) : Icon(Icons.arrow_upward),
+          Text(headers[column - 1])
+        ],
+      );
+    }
+    return Text(headers[column - 1]);
   }
 
   Widget _columnContent(int rowIndex, int columnIndex, Member member) {
@@ -351,8 +377,12 @@ class _GuildTableState extends State<GuildTable> {
   }
 
   void _sortMembers(int columnIndex) {
-    debugPrint("Current Index: $columnIndex, Last Index: $lastSortIndex");
-    if (lastSortIndex != columnIndex) {
+    if ((lastSortIndex != columnIndex && !ascending) ||
+        (lastSortIndex == columnIndex && !ascending) ||
+        (lastSortIndex != columnIndex)) {
+      ascending = true;
+      debugPrint(
+          "Current Index: $columnIndex, Last Index: $lastSortIndex, Ascending: $ascending");
       switch (columnIndex) {
         case 2:
           _guilds[widget.activeIndex].members.sort(
@@ -365,13 +395,32 @@ class _GuildTableState extends State<GuildTable> {
           break;
         case 8:
           _guilds[widget.activeIndex].members.sort(
-              (a, b) => a.totalEnergyDamage.compareTo(b.totalEnergyDamage));
+                (a, b) => a.totalDamage.compareTo(b.totalDamage),
+              );
           break;
       }
-    } else {
-      _guilds[widget.activeIndex].members.reversed.toList();
+    } else if (lastSortIndex == columnIndex && ascending) {
+      ascending = false;
+      debugPrint(
+          "Current Index: $columnIndex, Last Index: $lastSortIndex, Ascending: $ascending");
+      switch (columnIndex) {
+        case 2:
+          _guilds[widget.activeIndex].members.sort(
+              (a, b) => b.name.toLowerCase().compareTo(a.name.toLowerCase()));
+          break;
+        case 3:
+          _guilds[widget.activeIndex]
+              .members
+              .sort((a, b) => b.pgrId.compareTo(a.pgrId));
+          break;
+        case 8:
+          _guilds[widget.activeIndex]
+              .members
+              .sort((a, b) => b.totalDamage.compareTo(a.totalDamage));
+          break;
+      }
     }
-    setState(() {});
     lastSortIndex = columnIndex;
+    setState(() {});
   }
 }
