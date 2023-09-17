@@ -4,9 +4,9 @@ import 'package:pocketbase/pocketbase.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:scf_maze/app/models/guild.dart';
 import 'package:scf_maze/app/models/member.dart';
-import 'package:scf_maze/app/windows/login.dart';
-import 'package:scf_maze/app/windows/table_view.dart';
-import 'package:scf_maze/app/windows/sidebar.dart';
+import 'package:scf_maze/app/widgets/login.dart';
+import 'package:scf_maze/app/widgets/table_view.dart';
+import 'package:scf_maze/app/widgets/sidebar.dart';
 
 class WindowsApp extends StatefulWidget {
   const WindowsApp({super.key});
