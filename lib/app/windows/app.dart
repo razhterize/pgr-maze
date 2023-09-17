@@ -8,14 +8,14 @@ import 'package:scf_maze/app/windows/login.dart';
 import 'package:scf_maze/app/windows/table_view.dart';
 import 'package:scf_maze/app/windows/sidebar.dart';
 
-class App extends StatefulWidget {
-  const App({super.key});
+class WindowsApp extends StatefulWidget {
+  const WindowsApp({super.key});
 
   @override
-  State<App> createState() => _AppState();
+  State<WindowsApp> createState() => _WindowsAppState();
 }
 
-class _AppState extends State<App> {
+class _WindowsAppState extends State<WindowsApp> {
   final _formKey = GlobalKey<FormState>();
 
   bool authenticated = false;
