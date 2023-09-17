@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:window_manager/window_manager.dart';
-import 'app/app.dart';
+import 'app/windows/app.dart';
 
 Future<void> main(List<String> args) async {
   await dotenv.load();
