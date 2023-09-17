@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:scf_maze/app/models/guild.dart';
 import 'package:scf_maze/app/models/member.dart';
-import 'package:scf_maze/app/widget/table.dart';
+import 'package:scf_maze/app/windows/table.dart';
 
 class TableView extends StatefulWidget {
   const TableView(
