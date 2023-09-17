@@ -63,6 +63,8 @@ class Member extends RecordModel {
   int energyDamagePerMap(String map) => mapEnergyDamage[map]!
       .fold(0, (previous, current) => previous + current);
 
+  int get totalDamage => energyDamagePerMap("first") + energyDamagePerMap("second") + energyDamagePerMap("third");
+
   Future<void> createInDatabase(PocketBase pb) async {
     RecordModel record = createRecordModel();
     await pb.collection(collectionName).create(body: record.toJson());
