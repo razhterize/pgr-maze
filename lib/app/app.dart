@@ -317,6 +317,17 @@ class _AppState extends State<App> {
       });
     }
     managedGuilds = recordAuth.record?.data["managed_guilds"];
-    guildList = managedGuilds.map((guild) => Guild(pb, guild)).toList();
+    guildList = managedGuilds
+        .map((guild) => Guild(
+              pb,
+              guild,
+              guildChangeCallback,
+            ))
+        .toList();
+  }
+
+  void guildChangeCallback() {
+    debugPrint("Guild Change called");
+    setState(() {});
   }
 }
