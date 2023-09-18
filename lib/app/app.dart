@@ -159,29 +159,21 @@ class _AppState extends State<App> {
     );
   }
 
-  SearchAnchor searchBar() {
+  Widget searchBar() {
     double maxWidth = MediaQuery.of(context).size.width;
-    return SearchAnchor(
-      builder: (context, controller) {
-        return SizedBox(
-          width: maxWidth * 0.2,
-          height: 32,
-          child: SearchBar(
-            leading: searchModeDropdown(),
-            controller: controller,
-            hintText: "Search $searchMode",
-            onChanged: (value) {
-              setState(() {
-                filter = "$searchMode;$value";
-              });
-            },
-          ),
-        );
-      },
-      suggestionsBuilder: (context, controller) {
-        return List<Text>.generate(guildList[selectedGuildIndex].totalMembers,
-            (index) => Text(guildList[selectedGuildIndex].members[index].name));
-      },
+    return SizedBox(
+      width: maxWidth * 0.2,
+      height: 32,
+      child: SearchBar(
+        leading: searchModeDropdown(),
+        // controller: controller,
+        hintText: "Search $searchMode",
+        onChanged: (value) {
+          setState(() {
+            filter = "$searchMode;$value";
+          });
+        },
+      ),
     );
   }
 
@@ -239,57 +231,59 @@ class _AppState extends State<App> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.3,
-        height: MediaQuery.of(context).size.height,
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              DropdownButtonFormField(
-                value: managedGuilds.first.toString(),
-                items: managedGuilds
-                    .map((guild) => DropdownMenuItem(
-                          value: guild.toString(),
-                          child: Text(guildAbv[guild]!),
-                        ))
-                    .toList(),
-                onChanged: (value) => newMember.collectionName = value!,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(hintText: "Name"),
-                controller: newMemberControllers[0],
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Name cannot be empty';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                decoration: const InputDecoration(hintText: "PGR ID"),
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                controller: newMemberControllers[1],
-                validator: (value) {
-                  if (value == null || value.isEmpty || value == "0") {
-                    return 'PGR ID cannot be empty or 0';
-                  } else if (value.length != 8) {
-                    return "PGR ID must be 8 digits long";
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                decoration: const InputDecoration(hintText: "Discord Username"),
-                controller: newMemberControllers[2],
-              ),
-              TextFormField(
-                decoration: const InputDecoration(hintText: "Discord ID"),
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                controller: newMemberControllers[3],
-              ),
-            ],
+        height: MediaQuery.of(context).size.height * 0.3,
+        child: Center(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                DropdownButtonFormField(
+                  value: managedGuilds.first.toString(),
+                  items: managedGuilds
+                      .map((guild) => DropdownMenuItem(
+                            value: guild.toString(),
+                            child: Text(guildAbv[guild]!),
+                          ))
+                      .toList(),
+                  onChanged: (value) => newMember.collectionName = value!,
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(hintText: "Name"),
+                  controller: newMemberControllers[0],
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Name cannot be empty';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(hintText: "PGR ID"),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  controller: newMemberControllers[1],
+                  validator: (value) {
+                    if (value == null || value.isEmpty || value == "0") {
+                      return 'PGR ID cannot be empty or 0';
+                    } else if (value.length != 8) {
+                      return "PGR ID must be 8 digits long";
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  decoration:
+                      const InputDecoration(hintText: "Discord Username"),
+                  controller: newMemberControllers[2],
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(hintText: "Discord ID"),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  controller: newMemberControllers[3],
+                ),
+              ],
+            ),
           ),
         ),
       ),
