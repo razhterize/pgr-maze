@@ -126,9 +126,17 @@ class _TableViewState extends State<TableView> {
           hintText: "Energy Damage",
         ),
         controller: _energyDamageControllers[day],
+        keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        onChanged: (value) {
+        onSubmitted: (value) {
           if (value == "") value = "0";
+          setState(() {
+            activeMember.mapEnergyDamage[activeMap][day] = int.tryParse(value);
+          });
+          activeMember.update(widget.pb);
+        },
+        onTapOutside: (event) {
+          if (_energyDamageControllers[day].text == "") value = "0";
           setState(() {
             activeMember.mapEnergyDamage[activeMap][day] = int.tryParse(value);
           });
