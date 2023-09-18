@@ -7,17 +7,17 @@ import 'package:scf_maze/app/models/guild.dart';
 import 'package:scf_maze/app/models/member.dart';
 
 class GuildTable extends StatefulWidget {
+  final List<Guild> guilds;
+
+  final int activeIndex;
+  final String filter;
+  final Function(Member, String) callbackFunction;
   const GuildTable(
       {super.key,
       required this.guilds,
       required this.activeIndex,
       required this.filter,
       required this.callbackFunction});
-
-  final List<Guild> guilds;
-  final int activeIndex;
-  final String filter;
-  final Function(Member, String) callbackFunction;
 
   @override
   State<GuildTable> createState() => _GuildTableState();
@@ -47,12 +47,28 @@ class _GuildTableState extends State<GuildTable> {
     "Third Map",
     "Total Damage",
   ];
-  @override
-  void initState() {
-    _guilds = widget.guilds;
-    super.initState();
-  }
-
+  List<double> androidTableWidth = [
+    0.05,
+    0.1,
+    0.2,
+    0.15,
+    0.25,
+    0.13,
+    0.13,
+    0.13,
+    0.13,
+  ];
+  List<double> windowsTableWidth = [
+    0.03,
+    0.03,
+    0.15,
+    0.08,
+    0.15,
+    0.08,
+    0.08,
+    0.08,
+    0.1
+  ];
   @override
   Widget build(BuildContext context) {
     debugPrint("Filter: ${widget.filter}");
@@ -71,17 +87,20 @@ class _GuildTableState extends State<GuildTable> {
             child: TableView.builder(
               rowCount: _rowCountOnSort(),
               rowHeight: Platform.isAndroid ? 40 : 32,
-              columns: [
-                TableColumn(width: maxWidth * 0.05),
-                TableColumn(width: maxWidth * 0.1),
-                TableColumn(width: maxWidth * 0.2),
-                TableColumn(width: maxWidth * 0.15),
-                TableColumn(width: maxWidth * 0.25),
-                TableColumn(width: maxWidth * 0.11),
-                TableColumn(width: maxWidth * 0.11),
-                TableColumn(width: maxWidth * 0.11),
-                TableColumn(width: maxWidth *0.13),
-              ],
+              columns: (!Platform.isAndroid)
+                  ? [
+                      for (double multiplier in windowsTableWidth)
+                        TableColumn(
+                            width:
+                                MediaQuery.of(context).size.width * multiplier)
+                    ]
+                  : [
+                      for (int i = 0; i < 9; i++)
+                        TableColumn(
+                            width: MediaQuery.of(context).size.width *
+                                androidTableWidth[i],
+                            freezePriority: (i == 2) ? 2 : 0)
+                    ],
               headerBuilder: (context, contentBuilder) => contentBuilder(
                 context,
                 (context, column) => Material(
@@ -125,7 +144,7 @@ class _GuildTableState extends State<GuildTable> {
                       (context, column) {
                         if (widget.filter.startsWith("name;")) {
                           return Center(
-                            child: _columnContent(
+                            child: columnContent(
                                 row,
                                 column,
                                 _guilds[widget.activeIndex].filterByName(widget
@@ -134,7 +153,7 @@ class _GuildTableState extends State<GuildTable> {
                           );
                         } else if (widget.filter.startsWith("id;")) {
                           return Center(
-                            child: _columnContent(
+                            child: columnContent(
                                 row,
                                 column,
                                 _guilds[widget.activeIndex].filterById(
@@ -142,7 +161,7 @@ class _GuildTableState extends State<GuildTable> {
                           );
                         } else {
                           return Center(
-                            child: _columnContent(row, column,
+                            child: columnContent(row, column,
                                 _guilds[widget.activeIndex].members[row]),
                           );
                         }
@@ -155,160 +174,6 @@ class _GuildTableState extends State<GuildTable> {
           ),
         ),
       ),
-    );
-  }
-
-  int _rowCountOnSort() {
-    debugPrint(widget.filter);
-    if (widget.filter.startsWith("name;")) {
-      return _guilds[widget.activeIndex]
-          .filterByName(widget.filter.replaceAll("name;", ""))
-          .length;
-    } else {
-      return _guilds[widget.activeIndex]
-          .filterById(widget.filter.replaceAll("id;", ""))
-          .length;
-    }
-  }
-
-  Widget _headerContent(int column) {
-    if (column == lastSortIndex && [2, 3, 8].contains(column)) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ascending
-              ? const Icon(Icons.arrow_downward)
-              : const Icon(Icons.arrow_upward),
-          Text(headers[column - 1])
-        ],
-      );
-    }
-    return Text(headers[column - 1]);
-  }
-
-  Widget _columnContent(int rowIndex, int columnIndex, Member member) {
-    if (columnIndex == 0) {
-      return Checkbox(
-        value: member.selected,
-        onChanged: (value) {
-          setState(() {
-            member.selected = value!;
-          });
-        },
-      );
-    } else if (columnIndex == 2) {
-      return Text(
-        member.name,
-      );
-    } else if (columnIndex == 3) {
-      return Text(
-        "${member.pgrId}",
-      );
-    } else if (columnIndex == 4) {
-      return Text(
-        member.discordUsername,
-      );
-    } else if (columnIndex == 5) {
-      return Padding(
-        padding: const EdgeInsets.all(2.0),
-        child: Container(
-          color: Colors.white12,
-          child: MaterialButton(
-            onPressed: () {
-              widget.callbackFunction(member, "first");
-            },
-            child: Text(
-              "${member.energyDamagePerMap("first")}",
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      );
-    } else if (columnIndex == 6) {
-      return Padding(
-        padding: const EdgeInsets.all(2.0),
-        child: Container(
-          color: Colors.white24,
-          child: MaterialButton(
-            onPressed: () {
-              widget.callbackFunction(member, "second");
-            },
-            child: Text(
-              "${member.energyDamagePerMap("second")}",
-            ),
-          ),
-        ),
-      );
-    } else if (columnIndex == 7) {
-      return Padding(
-        padding: const EdgeInsets.all(2.0),
-        child: Container(
-          color: Colors.white30,
-          child: MaterialButton(
-            onPressed: () {
-              widget.callbackFunction(member, "third");
-            },
-            child: Text(
-              "${member.energyDamagePerMap("third")}",
-            ),
-          ),
-        ),
-      );
-    } else if (columnIndex == 8) {
-      return Text(
-        "${member.energyDamagePerMap("first") + member.energyDamagePerMap("second") + member.energyDamagePerMap("third")}",
-      );
-    } else {
-      return IconButton(
-          onPressed: () => _openEditMember(context, member),
-          icon: const Icon(Icons.edit_square));
-    }
-  }
-
-  void _openEditMember(BuildContext context, Member member) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          content: editMemberContent(context, member),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return deleteMemberDialog(member, context);
-                  },
-                ).then((value) => Navigator.pop(context)).then((value) {
-                  setState(() {});
-                });
-              },
-              child: const Text("Delete Member"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  member.name = _editMemberControllers[0].text;
-                  member.pgrId =
-                      int.tryParse(_editMemberControllers[1].text) as int;
-                  member.discordUsername = _editMemberControllers[2].text;
-                  member.discordId = _editMemberControllers[3].text;
-                  member.update(_guilds.first.pb);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Saving...'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                  Navigator.pop(context);
-                  setState(() {});
-                }
-              },
-              child: const Text("Save"),
-            ),
-          ],
-        );
-      },
     );
   }
 
@@ -388,6 +253,12 @@ class _GuildTableState extends State<GuildTable> {
     );
   }
 
+  @override
+  void initState() {
+    _guilds = widget.guilds;
+    super.initState();
+  }
+
   void sortMembers(int columnIndex) {
     if ((lastSortIndex != columnIndex && !ascending) ||
         (lastSortIndex == columnIndex && !ascending) ||
@@ -434,5 +305,159 @@ class _GuildTableState extends State<GuildTable> {
     }
     lastSortIndex = columnIndex;
     setState(() {});
+  }
+
+  Widget columnContent(int rowIndex, int columnIndex, Member member) {
+    if (columnIndex == 0) {
+      return Checkbox(
+        value: member.selected,
+        onChanged: (value) {
+          setState(() {
+            member.selected = value!;
+          });
+        },
+      );
+    } else if (columnIndex == 2) {
+      return Text(
+        member.name,
+      );
+    } else if (columnIndex == 3) {
+      return Text(
+        "${member.pgrId}",
+      );
+    } else if (columnIndex == 4) {
+      return Text(
+        member.discordUsername,
+      );
+    } else if (columnIndex == 5) {
+      return Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: Container(
+          color: Colors.white12,
+          child: MaterialButton(
+            onPressed: () {
+              widget.callbackFunction(member, "first");
+            },
+            child: Text(
+              "${member.energyDamagePerMap("first")}",
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    } else if (columnIndex == 6) {
+      return Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: Container(
+          color: Colors.white24,
+          child: MaterialButton(
+            onPressed: () {
+              widget.callbackFunction(member, "second");
+            },
+            child: Text(
+              "${member.energyDamagePerMap("second")}",
+            ),
+          ),
+        ),
+      );
+    } else if (columnIndex == 7) {
+      return Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: Container(
+          color: Colors.white30,
+          child: MaterialButton(
+            onPressed: () {
+              widget.callbackFunction(member, "third");
+            },
+            child: Text(
+              "${member.energyDamagePerMap("third")}",
+            ),
+          ),
+        ),
+      );
+    } else if (columnIndex == 8) {
+      return Text(
+        "${member.energyDamagePerMap("first") + member.energyDamagePerMap("second") + member.energyDamagePerMap("third")}",
+      );
+    } else {
+      return IconButton(
+          onPressed: () => _openEditMember(context, member),
+          icon: const Icon(Icons.edit_square));
+    }
+  }
+
+  Widget _headerContent(int column) {
+    if (column == lastSortIndex && [2, 3, 8].contains(column)) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ascending
+              ? const Icon(Icons.arrow_downward)
+              : const Icon(Icons.arrow_upward),
+          Text(headers[column - 1])
+        ],
+      );
+    }
+    return Text(headers[column - 1]);
+  }
+
+  void _openEditMember(BuildContext context, Member member) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: editMemberContent(context, member),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return deleteMemberDialog(member, context);
+                  },
+                ).then((value) => Navigator.pop(context)).then((value) {
+                  setState(() {});
+                });
+              },
+              child: const Text("Delete Member"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  member.name = _editMemberControllers[0].text;
+                  member.pgrId =
+                      int.tryParse(_editMemberControllers[1].text) as int;
+                  member.discordUsername = _editMemberControllers[2].text;
+                  member.discordId = _editMemberControllers[3].text;
+                  member.update(_guilds.first.pb);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Saving...'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  Navigator.pop(context);
+                  setState(() {});
+                }
+              },
+              child: const Text("Save"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  int _rowCountOnSort() {
+    debugPrint(widget.filter);
+    if (widget.filter.startsWith("name;")) {
+      return _guilds[widget.activeIndex]
+          .filterByName(widget.filter.replaceAll("name;", ""))
+          .length;
+    } else {
+      return _guilds[widget.activeIndex]
+          .filterById(widget.filter.replaceAll("id;", ""))
+          .length;
+    }
   }
 }
