@@ -320,6 +320,10 @@ class _GuildTableState extends State<GuildTable> {
     } else if (columnIndex == 2) {
       return Text(
         member.name,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          // fontSize: 16,
+        ),
       );
     } else if (columnIndex == 3) {
       return Text(
