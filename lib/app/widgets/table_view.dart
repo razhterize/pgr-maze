@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pocketbase/pocketbase.dart';
@@ -45,7 +43,7 @@ class _TableViewState extends State<TableView> {
   Widget build(BuildContext context) {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
-      child: (Platform.isAndroid || Platform.isIOS)
+      child: (MediaQuery.of(context).orientation == Orientation.portrait)
           ? mobileLayout()
           : desktopLayout(),
     );
@@ -119,30 +117,30 @@ class _TableViewState extends State<TableView> {
   }
 
   Widget energyDamageWidget(int day, dynamic value) {
-    return ListTile(
-      leading: Text("Day ${day + 1}"),
-      title: TextField(
-        decoration: const InputDecoration(
-          hintText: "Energy Damage",
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 2, 8, 0),
+      child: TextField(
+          decoration: InputDecoration(
+            label: Text("Day ${1 + day}"),
+          ),
+          controller: _energyDamageControllers[day],
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          onSubmitted: (value) {
+            if (value == "") value = "0";
+            setState(() {
+              activeMember.mapEnergyDamage[activeMap][day] = int.tryParse(value);
+            });
+            activeMember.update(widget.pb);
+          },
+          onTapOutside: (event) {
+            if (_energyDamageControllers[day].text == "") value = "0";
+            setState(() {
+              activeMember.mapEnergyDamage[activeMap][day] = int.tryParse(value);
+            });
+            activeMember.update(widget.pb);
+          },
         ),
-        controller: _energyDamageControllers[day],
-        keyboardType: TextInputType.number,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        onSubmitted: (value) {
-          if (value == "") value = "0";
-          setState(() {
-            activeMember.mapEnergyDamage[activeMap][day] = int.tryParse(value);
-          });
-          activeMember.update(widget.pb);
-        },
-        onTapOutside: (event) {
-          if (_energyDamageControllers[day].text == "") value = "0";
-          setState(() {
-            activeMember.mapEnergyDamage[activeMap][day] = int.tryParse(value);
-          });
-          activeMember.update(widget.pb);
-        },
-      ),
     );
   }
 
