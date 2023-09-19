@@ -20,6 +20,7 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   final _formKey = GlobalKey<FormState>();
 
+  bool darkTheme = true;
   bool authenticated = false;
   final PocketBase pb = PocketBase(dotenv.env["PB_URL"]!);
   late RecordAuth recordAuth;
@@ -55,16 +56,18 @@ class _AppState extends State<App> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.dark,
+      themeMode: darkTheme ? ThemeMode.dark : ThemeMode.light,
       darkTheme: ThemeData.dark(),
       home: Builder(builder: (context) {
         return Scaffold(
             appBar: authenticated ? appBar(context) : null,
             drawer: Sidebar(
                 managedGuilds: managedGuilds,
-                callbackFunction: _sidebarCallback),
+                callbackFunction: _sidebarCallback,
+                themeChanger: themeChange,
+                ),
             body: authenticated
-                ? SafeArea(child: mainTable(context))
+                ? SafeArea(bottom: false, child: mainTable(context))
                 : SafeArea(
                     child: Login(loginCallback: _loginCallback, pb: pb)));
       }),
@@ -75,15 +78,15 @@ class _AppState extends State<App> {
     return AppBar(
       toolbarHeight: 36,
       title: Text(guildAbv[guildList[selectedGuildIndex].name]!),
-      centerTitle: !Platform.isAndroid,
+      centerTitle: false,
       actions: [
         Padding(
-          padding: const EdgeInsets.all(3.0),
+          padding: const EdgeInsets.all(2.0),
           child: searchBar(),
         ),
         Padding(
             padding: const EdgeInsets.all(3.0),
-            child: (!Platform.isAndroid)
+            child: (MediaQuery.of(context).orientation == Orientation.landscape)
                 ? ElevatedButton.icon(
                     onPressed: () {
                       Clipboard.setData(
@@ -106,7 +109,7 @@ class _AppState extends State<App> {
                     icon: Icon(Icons.alternate_email))),
         Padding(
             padding: const EdgeInsets.all(3.0),
-            child: (!Platform.isAndroid)
+            child: (MediaQuery.of(context).orientation == Orientation.landscape)
                 ? ElevatedButton.icon(
                     label: const Text("Member"),
                     icon: const Icon(Icons.add),
@@ -123,7 +126,7 @@ class _AppState extends State<App> {
                     icon: Icon(Icons.add))),
         Padding(
             padding: const EdgeInsets.all(3.0),
-            child: (!Platform.isAndroid)
+            child: (MediaQuery.of(context).orientation == Orientation.landscape)
                 ? ElevatedButton.icon(
                     onPressed: () {
                       setState(() {});
@@ -162,9 +165,13 @@ class _AppState extends State<App> {
   Widget searchBar() {
     double maxWidth = MediaQuery.of(context).size.width;
     return SizedBox(
-      width: maxWidth * 0.2,
-      height: 32,
+      width: maxWidth * 0.4,
+      // height: 32,
       child: SearchBar(
+        constraints: const BoxConstraints.expand(),
+        // shadowColor: MaterialStateColor.resolveWith((states) => Color.fromRGBO(234, 5, 5, 1)),
+        backgroundColor: MaterialStateColor.resolveWith(
+            (states) => Color(Colors.lightBlue.value)),
         leading: searchModeDropdown(),
         // controller: controller,
         hintText: "Search $searchMode",
@@ -329,5 +336,11 @@ class _AppState extends State<App> {
   void guildChangeCallback() {
     debugPrint("Guild Change called");
     setState(() {});
+  }
+
+  void themeChange(){
+    setState(() {
+      darkTheme = !darkTheme;
+    });
   }
 }
