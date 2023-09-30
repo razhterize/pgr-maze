@@ -42,9 +42,9 @@ class _GuildTableState extends State<GuildTable> {
     "Name",
     "PGR ID",
     "Discord Username",
-    "First Map",
-    "Second Map",
-    "Third Map",
+    "First Week",
+    "Second Week",
+    "Third Week",
     "Total Damage",
   ];
   List<double> androidTableWidth = [
@@ -89,10 +89,11 @@ class _GuildTableState extends State<GuildTable> {
               rowHeight: Platform.isAndroid ? 40 : 32,
               columns: (!Platform.isAndroid)
                   ? [
-                      for (double multiplier in windowsTableWidth)
+                      for (int i = 0; i < 9; i++)
                         TableColumn(
-                            width:
-                                MediaQuery.of(context).size.width * multiplier)
+                            width: MediaQuery.of(context).size.width *
+                                windowsTableWidth[i],
+                            freezePriority: (i == 2) ? 2 : 0)
                     ]
                   : [
                       for (int i = 0; i < 9; i++)

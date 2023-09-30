@@ -6,7 +6,7 @@ class Member extends RecordModel {
   late String discordUsername;
   late String discordId;
   late int pgrId;
-  late Map<String, dynamic> mapEnergyDamage;
+  late Map<String, dynamic> mapData;
   late int totalEnergyDamage = 0;
   bool selected = false;
 
@@ -21,7 +21,7 @@ class Member extends RecordModel {
     discordUsername = data["discord_username"];
     discordId = data["discord_id"];
     pgrId = data["pgr_id"];
-    mapEnergyDamage = data["map_data"];
+    mapData = data["map_data"];
     totalEnergyDamage = data["total_energy_damage"];
   }
 
@@ -33,10 +33,25 @@ class Member extends RecordModel {
     discordId = discordId;
     collectionName = guild;
     totalEnergyDamage = 0;
-    mapEnergyDamage = {
-      "first": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      "second": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      "third": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    mapData = {
+      "first": {
+        "energy_spent": 0,
+        "points": 0,
+        "overcap": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "wrong_node": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      },
+      "second": {
+        "energy_spent": 0,
+        "points": 0,
+        "overcap": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "wrong_node": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      },
+      "third": {
+        "energy_spent": 0,
+        "points": 0,
+        "overcap": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "wrong_node": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      }
     };
   }
 
@@ -46,7 +61,7 @@ class Member extends RecordModel {
       "discord_username": discordUsername,
       "discord_id": discordId,
       "pgr_id": pgrId,
-      "map_data": mapEnergyDamage,
+      "map_data": mapData,
       "totalEnergyDamage": totalEnergyDamage
     };
 
@@ -60,10 +75,18 @@ class Member extends RecordModel {
     return record;
   }
 
-  int energyDamagePerMap(String map) => mapEnergyDamage[map]!
-      .fold(0, (previous, current) => previous + current);
+  int energyDamagePerMap(String map) {
+    int damage = 0;
+    num overcap = mapData[map]["overcap"].fold(0, (previous, after) => previous + after);
+    num wrongNode = mapData[map]["wrong_node"].fold(0, (previous, after) => previous + after);
+    damage = overcap + wrongNode as int;
+    return damage;
+  }
 
-  int get totalDamage => energyDamagePerMap("first") + energyDamagePerMap("second") + energyDamagePerMap("third");
+  int get totalDamage =>
+      energyDamagePerMap("first") +
+      energyDamagePerMap("second") +
+      energyDamagePerMap("third");
 
   Future<void> createInDatabase(PocketBase pb) async {
     RecordModel record = createRecordModel();
@@ -78,12 +101,12 @@ class Member extends RecordModel {
     return false;
   }
 
-  Future<void> update(PocketBase pb) async{
+  Future<void> update(PocketBase pb) async {
     RecordModel record = createRecordModel();
     await pb.collection(collectionName).update(id, body: record.toJson());
   }
 
-  Future<void> delete(PocketBase pb) async{
+  Future<void> delete(PocketBase pb) async {
     await pb.collection(collectionName).delete(id);
   }
 
@@ -102,10 +125,25 @@ class Member extends RecordModel {
     pgrId = 0;
     discordId = "";
     discordUsername = "";
-    mapEnergyDamage = {
-      "first": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      "second": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      "third": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    mapData = {
+      "first": {
+        "energy_spent": 0,
+        "points": 0,
+        "overcap": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "wrong_node": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      },
+      "second": {
+        "energy_spent": 0,
+        "points": 0,
+        "overcap": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "wrong_node": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      },
+      "third": {
+        "energy_spent": 0,
+        "points": 0,
+        "overcap": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "wrong_node": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      }
     };
     totalEnergyDamage = 0;
   }
