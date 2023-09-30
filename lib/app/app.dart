@@ -218,7 +218,6 @@ class _AppState extends State<App> {
                 newMember.discordUsername = newMemberControllers[2].text;
                 newMember.discordId = newMemberControllers[3].text;
                 newMember.createInDatabase(pb);
-                guildList[selectedGuildIndex].members.add(newMember);
                 ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Updating Members...')));
                 Navigator.pop(context);
