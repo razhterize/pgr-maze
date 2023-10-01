@@ -7,9 +7,12 @@ import 'package:scf_maze/app/models/member.dart';
 import 'package:scf_maze/app/widgets/login.dart';
 import 'package:scf_maze/app/widgets/table_view.dart';
 import 'package:scf_maze/app/widgets/sidebar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class App extends StatefulWidget {
-  const App({super.key});
+  const App({super.key, required this.sharedPreferences});
+
+  final SharedPreferences sharedPreferences;
 
   @override
   State<App> createState() => _AppState();
@@ -18,10 +21,9 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   final _formKey = GlobalKey<FormState>();
 
+  late final PocketBase pb;
   bool darkTheme = true;
   bool authenticated = false;
-  final PocketBase pb = PocketBase(dotenv.env["PB_URL"]!);
-  late RecordAuth recordAuth;
   List<Guild> guildList = [];
   List<TextEditingController> newMemberControllers = [
     TextEditingController(),
@@ -47,6 +49,14 @@ class _AppState extends State<App> {
 
   @override
   void initState() {
+    var asyncAuthStore = AsyncAuthStore(
+            save: (data) => widget.sharedPreferences.setString("pb_auth", data),
+            initial: widget.sharedPreferences.getString("pb_auth"));
+    pb = PocketBase(dotenv.env["PB_URL"]!,
+        authStore: asyncAuthStore);
+    if (pb.authStore.isValid) {
+      _loginCallback(RecordAuth(token: pb.authStore.token));
+    }
     super.initState();
   }
 
@@ -60,10 +70,10 @@ class _AppState extends State<App> {
         return Scaffold(
             appBar: authenticated ? appBar(context) : null,
             drawer: Sidebar(
-                managedGuilds: managedGuilds,
-                callbackFunction: _sidebarCallback,
-                themeChanger: themeChange,
-                ),
+              managedGuilds: managedGuilds,
+              callbackFunction: _sidebarCallback,
+              themeChanger: themeChange,
+            ),
             body: authenticated
                 ? SafeArea(bottom: false, child: mainTable(context))
                 : SafeArea(
@@ -314,13 +324,22 @@ class _AppState extends State<App> {
     });
   }
 
-  void _loginCallback(RecordAuth recordAuth) {
-    if (pb.authStore.isValid) {
+  void _loginCallback(dynamic recordAuth) {
+    RecordModel? _record;
+    if (recordAuth.token != "") {
+      pb.collection("users").authRefresh();
+      _record = pb.authStore.model;
       setState(() {
         authenticated = true;
       });
     }
-    managedGuilds = recordAuth.record?.data["managed_guilds"];
+    if (recordAuth.record != null) {
+      _record = recordAuth.record;
+      setState(() {
+        authenticated = true;
+      });
+    }
+    managedGuilds = _record!.data["managed_guilds"];
     guildList = managedGuilds
         .map((guild) => Guild(
               pb,
@@ -335,7 +354,7 @@ class _AppState extends State<App> {
     setState(() {});
   }
 
-  void themeChange(){
+  void themeChange() {
     setState(() {
       darkTheme = !darkTheme;
     });
